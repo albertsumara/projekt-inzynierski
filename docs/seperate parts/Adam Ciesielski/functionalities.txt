@@ -1,0 +1,17 @@
+Główne funkcjonalności:
+
+1. Profil użytkownika i kalkulator kalorii: wprowadzanie parametrów fizycznych (płeć,
+wiek, masa ciała, wzrost, poziom aktywności), wybór celu (redukcja, utrzymanie wagi,
+budowa masy) oraz zaznaczenie diety (np. wegetariańska, bezglutenowa, bez laktozy).
+
+2. Rozpoznawanie produktów ze zdjęć z opcją ręcznej korekty: przesyłanie zdjęć posiadanych produktów, które są klasyfikowane przez
+model sieci neuronowej. Użytkownik może ręcznie edytować wykrytą listę (usunąć
+błędnie rozpoznany produkt lub doklikać produkty np. makaron,
+ryż itp.).
+
+3. Ranking rekomendowanych potraw: wyszukiwanie i sortowanie przepisów z bazy
+SQL pod kątem największej liczby posiadanych składników oraz dopasowania do
+wyliczonego limitu kalorii na dany posiłek.
+
+4. Szczegółowy widok przepisu i lista ulubionych: prezentacja instrukcji
+przygotowania krok po kroku, czasu gotowania, makroskładników oraz zapisywanie wybranych dań do ulubionych.

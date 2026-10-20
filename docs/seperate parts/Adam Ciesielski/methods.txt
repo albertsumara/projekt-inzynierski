@@ -1,0 +1,25 @@
+Metody użyte do osiągnięcia funkcjonalności: 
+
+1. Uczenie transferowe z użyciem sieci CNN w Keras:
+wykorzystanie pretrenowanego modelu MobileNetV2 z
+biblioteki Keras, wyuczonego na zbiorze ImageNet. Model zostanie dotrenowany w
+środowisku Google Colab na zbiorze zdjęć obejmującym 20 wybranych klas popularnych
+produktów spożywczych.
+
+2. Augmentacja danych obrazowych:
+automatyczne
+obracanie, przybliżanie i odbijanie zdjęć podczas treningu sieci, co zwiększa odporność
+modelu na zdjęcia robione telefonem w różnym oświetleniu i pod różnym kątem.
+
+3. Model zapotrzebowania energetycznego (wzór Mifflina-St Jeora) i filtrowanie
+regułowe SQL: 
+wyliczanie podstawowej (BMR) oraz całkowitej przemiany materii
+(TDEE = BMR * PAL), a następnie odrzucenie z bazy SQL przepisów niezgodnych z dietą
+użytkownika:
+BMR = 10 * m + 6.25 * h - 5 * a + s (gdzie s = +5 dla mężczyzn, -161 dla
+kobiet)
+
+4. Algorytm rekomendacji (wskaźnik Jaccarda + dopasowanie
+kaloryczne): 
+obliczanie dla każdego przepisu oceny końcowej (wartość od 0 do 1), która w 70% zależy od ułamka posiadanych składników wymaganych w przepisie, a w 30% od
+bliskości kalorycznej potrawy względem celu
