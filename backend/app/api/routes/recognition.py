@@ -1,19 +1,16 @@
-
 from fastapi import APIRouter, File, HTTPException, UploadFile, status
+from models.image_classifier import ImageClassifier
 
 from app.schemas.recognition import RecognitionResponse
-from app.services.image_service import InvalidImageError
-from app.services.image_service import ImageService
+from app.services.image_service import ImageService, InvalidImageError
 from app.services.product_service import ProductService
-from app.models.image_classifier import ImageClassifier
-
 
 router = APIRouter()
 
 image_service = ImageService()
 image_classifier = ImageClassifier()
 
-prediction_service = ProductService(
+product_service = ProductService(
     image_service=image_service,
     image_classifier=image_classifier,
 )
@@ -24,13 +21,13 @@ prediction_service = ProductService(
     response_model=RecognitionResponse,
     status_code=status.HTTP_200_OK,
 )
-async def predict(
+async def recognize(
     file: UploadFile = File(...),
 ) -> RecognitionResponse:
     image_bytes = await file.read()
 
     try:
-        predictions = prediction_service.predict_product(
+        recognitions = product_service.recognize_product(
             image_bytes=image_bytes,
             content_type=file.content_type,
         )
@@ -44,5 +41,5 @@ async def predict(
 
     return RecognitionResponse(
         filename=file.filename or "uploaded-image",
-        predictions=predictions,
+        recognitions=recognitions,
     )

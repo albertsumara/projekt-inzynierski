@@ -1,5 +1,5 @@
+from models.image_classifier import ImageClassifier
 
-from app.models.image_classifier import ImageClassifier
 from app.services.image_service import ImageService
 
 
@@ -12,7 +12,7 @@ class ProductService:
         self.image_service = image_service
         self.image_classifier = image_classifier
 
-    def predict_product(
+    def recognize_product(
         self,
         image_bytes: bytes,
         content_type: str | None,

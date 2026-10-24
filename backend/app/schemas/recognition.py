@@ -1,4 +1,3 @@
-
 from pydantic import BaseModel, Field
 
 
@@ -10,4 +9,4 @@ class RecognitionItem(BaseModel):
 
 class RecognitionResponse(BaseModel):
     filename: str
-    predictions: list[RecognitionItem]
+    recognitions: list[RecognitionItem]

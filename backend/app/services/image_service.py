@@ -1,8 +1,13 @@
-
 from io import BytesIO
 
 from PIL import Image, UnidentifiedImageError
 
+from app.errors.image_errors import (
+    EmptyImageFileError,
+    InvalidImageContentTypeError,
+    InvalidImageFormatError,
+    InvalidImageSizeError,
+)
 
 MAX_IMAGE_SIZE = 8 * 1024 * 1024
 
@@ -26,29 +31,21 @@ class ImageService:
         content_type: str | None,
     ) -> Image.Image:
         if not image_bytes:
-            raise InvalidImageError("Image file is required.")
+            raise EmptyImageFileError("The image file is empty.")
 
         if len(image_bytes) > MAX_IMAGE_SIZE:
-            raise InvalidImageError(
-                "Image exceeding 8 MB limit."
-            )
+            raise InvalidImageSizeError("The image file cannot be larger than 8 MB.")
 
         if content_type not in ALLOWED_CONTENT_TYPES:
-            raise InvalidImageError(
-                "Dozwolone formaty: JPEG, PNG i WEBP."
-            )
+            raise InvalidImageContentTypeError("This content type is not supported.")
 
         try:
             with Image.open(BytesIO(image_bytes)) as image:
                 if image.format not in ALLOWED_FORMATS:
-                    raise InvalidImageError(
-                        "Invalid image format."
-                    )
+                    raise InvalidImageFormatError("This image format is not supported.")
 
                 image.load()
                 return image.convert("RGB")
 
         except (UnidentifiedImageError, OSError) as exc:
-            raise InvalidImageError(
-                "Unknown error."
-            ) from exc
+            raise InvalidImageError("The image file is invalid or corrupted.") from exc

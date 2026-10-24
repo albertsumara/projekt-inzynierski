@@ -1,4 +1,3 @@
-
 import numpy as np
 from PIL import Image
 
@@ -6,7 +5,7 @@ from PIL import Image
 class ImageClassifier:
     def __init__(self) -> None:
         self._model = None
-        self._decode_predictions = None
+        self._decode_recognitions = None
         self._preprocess_input = None
 
     def _load_model(self) -> None:
@@ -20,7 +19,7 @@ class ImageClassifier:
         )
 
         self._model = MobileNetV2(weights="imagenet")
-        self._decode_predictions = decode_predictions
+        self._decode_recognitions = decode_predictions
         self._preprocess_input = preprocess_input
 
     def _prepare_image(self, image):
@@ -40,7 +39,7 @@ class ImageClassifier:
             verbose=0,
         )
 
-        results = self._decode_predictions(
+        results = self._decode_recognitions(
             probabilities,
             top=3,
         )[0]
