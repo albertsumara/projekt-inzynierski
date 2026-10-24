@@ -1,6 +1,5 @@
-
-from app.models.image_classifier import ImageClassifier
 from app.services.image_service import ImageService
+from backend.models.image_classifier import ImageClassifier
 
 
 class ProductService:

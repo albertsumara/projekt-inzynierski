@@ -5,7 +5,7 @@ from app.schemas.recognition import RecognitionResponse
 from app.services.image_service import InvalidImageError
 from app.services.image_service import ImageService
 from app.services.product_service import ProductService
-from app.models.image_classifier import ImageClassifier
+from backend.models.image_classifier import ImageClassifier
 
 
 router = APIRouter()
