@@ -1,0 +1,22 @@
+
+from fastapi import FastAPI
+
+from app.api.routes.recognition import router as prediction_router
+
+app = FastAPI(
+    title="Diet App",
+    description="Diet application manager",
+    version="0.1.0",
+)
+
+
+@app.get("/health", tags=["Health"])
+def health_check() -> dict[str, str]:
+    return {"status": "ok"}
+
+
+app.include_router(
+    prediction_router,
+    prefix="/api/v1",
+    tags=["/product/recognize"],
+)
