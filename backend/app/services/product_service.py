@@ -4,11 +4,7 @@ from app.services.image_service import ImageService
 
 
 class ProductService:
-    def __init__(
-        self,
-        image_service: ImageService,
-        image_classifier: ImageClassifier,
-    ) -> None:
+    def __init__(self, image_service: ImageService, image_classifier: ImageClassifier):
         self.image_service = image_service
         self.image_classifier = image_classifier
 
