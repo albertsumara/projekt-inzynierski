@@ -3,4 +3,4 @@ __pycache__/
 
 .pytest_cache/
 
-backend/training/dataset/*
+backend/machine_learning/dataset/*
