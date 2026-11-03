@@ -1,18 +1,12 @@
 import random
 import shutil
-from pathlib import Path
 
-BASE_DIR = Path(__file__).parent
-DATASET_DIR = BASE_DIR / "dataset"
+from backend.paths import RAW_DIR, TRAIN_DIR, VALIDATION_DIR
 
 VALIDATION_SPLIT = 0.2
 RANDOM_SEED = 42
 
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
-
-RAW_DIR = DATASET_DIR / "raw"
-TRAIN_DIR = DATASET_DIR / "train"
-VALIDATION_DIR = DATASET_DIR / "validation"
 
 
 def prepare_dataset():

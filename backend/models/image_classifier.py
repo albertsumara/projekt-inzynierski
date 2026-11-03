@@ -1,10 +1,14 @@
+import json
+
 import numpy as np
+from paths import CLASSES_PATH, MODEL_PATH
 from PIL import Image
 
 
 class ImageClassifier:
     def __init__(self) -> None:
         self._model = None
+        self._classes = None
         self._decode_recognitions = None
         self._preprocess_input = None
 
@@ -12,13 +16,20 @@ class ImageClassifier:
         if self._model is not None:
             return
 
-        from tensorflow.keras.applications import MobileNetV2
+        import tensorflow as tf
         from tensorflow.keras.applications.mobilenet_v2 import (
             decode_predictions,
             preprocess_input,
         )
 
-        self._model = MobileNetV2(weights="imagenet")
+        self._model = tf.keras.models.load_model(
+            MODEL_PATH,
+            compile=False,
+        )
+
+        with open(CLASSES_PATH, "r", encoding="utf-8") as file:
+            self._classes = json.load(file)
+
         self._decode_recognitions = decode_predictions
         self._preprocess_input = preprocess_input
 
@@ -34,21 +45,39 @@ class ImageClassifier:
 
         image_array = self._prepare_image(image)
 
-        probabilities = self._model.predict(
+        imagenet_probabilities, custom_probabilities = self._model.predict(
             image_array,
             verbose=0,
         )
 
-        results = self._decode_recognitions(
-            probabilities,
+        imagenet_results = self._decode_recognitions(
+            imagenet_probabilities,
             top=3,
         )[0]
 
-        return [
+        results = [
             {
                 "class_id": class_id,
                 "product": label,
                 "confidence": round(float(score), 4),
             }
-            for class_id, label, score in results
+            for class_id, label, score in imagenet_results
         ]
+
+        custom_scores = custom_probabilities[0]
+        custom_top_indices = np.argsort(custom_scores)[-3:][::-1]
+
+        for index in custom_top_indices:
+            results.append(
+                {
+                    "class_id": f"custom_{self._classes[index]}",
+                    "product": self._classes[index],
+                    "confidence": round(float(custom_scores[index]), 4),
+                }
+            )
+
+        results.sort(
+            key=lambda result: result["confidence"],
+            reverse=True,
+        )
+        return results[:3]
