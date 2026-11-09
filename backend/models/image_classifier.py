@@ -1,16 +1,19 @@
 import json
 
 import numpy as np
-from paths import CLASSES_PATH, MODEL_PATH
+from paths import CLASSES_PATH, IMAGENET_FOOD_CLASSES, MODEL_PATH
 from PIL import Image
 
 
 class ImageClassifier:
     def __init__(self) -> None:
         self._model = None
-        self._classes = None
+        self._custom_classes = None
+        self._imagenet_classes = None
         self._decode_recognitions = None
         self._preprocess_input = None
+        # this offset is used because indexes 0...999 are used by imagenet set
+        self.CUSTOM_ID_OFFSET = 1000
 
     def _load_model(self) -> None:
         if self._model is not None:
@@ -27,8 +30,20 @@ class ImageClassifier:
             compile=False,
         )
 
+        with open(
+            IMAGENET_FOOD_CLASSES, "r", encoding="utf-8"
+        ) as imagenet_classes_file:
+            raw_imagenet_classes = json.load(imagenet_classes_file)
+            self._imagenet_classes = {
+                int(k): v for k, v in raw_imagenet_classes.items()
+            }
+
         with open(CLASSES_PATH, "r", encoding="utf-8") as file:
-            self._classes = json.load(file)
+            raw_custom_classes = json.load(file)
+            self._custom_classes = {
+                index + self.CUSTOM_ID_OFFSET: product_name
+                for index, product_name in enumerate(raw_custom_classes)
+            }
 
         self._decode_recognitions = decode_predictions
         self._preprocess_input = preprocess_input
@@ -50,29 +65,34 @@ class ImageClassifier:
             verbose=0,
         )
 
-        imagenet_results = self._decode_recognitions(
-            imagenet_probabilities,
-            top=3,
-        )[0]
+        results = []
+        imagenet_scores = imagenet_probabilities[0]
 
-        results = [
-            {
-                "class_id": class_id,
-                "product": label,
-                "confidence": round(float(score), 4),
-            }
-            for class_id, label, score in imagenet_results
-        ]
+        for imagenet_class_index, product_label in self._imagenet_classes.items():
+            if imagenet_class_index < len(imagenet_scores):
+                results.append(
+                    {
+                        "class_id": str(imagenet_class_index),
+                        "product": product_label,
+                        "confidence": round(
+                            float(imagenet_scores[imagenet_class_index]), 4
+                        ),
+                    }
+                )
 
         custom_scores = custom_probabilities[0]
-        custom_top_indices = np.argsort(custom_scores)[-3:][::-1]
 
-        for index in custom_top_indices:
+        for custom_class_index, product_label in self._custom_classes.items():
             results.append(
                 {
-                    "class_id": f"custom_{self._classes[index]}",
-                    "product": self._classes[index],
-                    "confidence": round(float(custom_scores[index]), 4),
+                    "class_id": str(custom_class_index),
+                    "product": product_label,
+                    "confidence": round(
+                        float(
+                            custom_scores[custom_class_index - self.CUSTOM_ID_OFFSET]
+                        ),
+                        4,
+                    ),
                 }
             )
 
