@@ -1,7 +1,12 @@
-
 fastapi[standard]
 tensorflow
 pillow
 numpy
 pytest
 httpx
+
+# Database
+sqlalchemy
+psycopg[binary]
+alembic
+python-dotenv
