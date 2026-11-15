@@ -1,12 +1,12 @@
 import random
 import shutil
 
-from backend.paths import RAW_DIR, TRAIN_DIR, VALIDATION_DIR
+from paths import RAW_DIR, TRAIN_DIR, VALIDATION_DIR
 
 VALIDATION_SPLIT = 0.2
 RANDOM_SEED = 42
 
-IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
+IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".jfif", ".png", ".webp"}
 
 
 def prepare_dataset():
@@ -32,6 +32,11 @@ def prepare_dataset():
             for file in class_dir.iterdir()
             if file.is_file() and file.suffix.lower() in IMAGE_EXTENSIONS
         ]
+        training_filenames = [_training_filename(image) for image in images]
+        if len(training_filenames) != len(set(training_filenames)):
+            raise ValueError(
+                f"Multiple images map to the same filename in {class_dir}"
+            )
 
         random_generator.shuffle(images)
 
@@ -46,10 +51,16 @@ def prepare_dataset():
             directory.mkdir(parents=True, exist_ok=True)
 
         for image in train_images:
-            shutil.copy2(image, train_dir / image.name)
+            shutil.copy2(image, train_dir / _training_filename(image))
 
         for image in validation_images:
-            shutil.copy2(image, validation_dir / image.name)
+            shutil.copy2(image, validation_dir / _training_filename(image))
+
+
+def _training_filename(image):
+    if image.suffix.lower() == ".jfif":
+        return image.with_suffix(".jpg").name
+    return image.name
 
 
 if __name__ == "__main__":
