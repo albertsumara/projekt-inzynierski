@@ -13,11 +13,12 @@ MAX_IMAGE_SIZE = 8 * 1024 * 1024
 
 ALLOWED_CONTENT_TYPES = {
     "image/jpeg",
+    "image/jfif",
     "image/png",
     "image/webp",
 }
 
-ALLOWED_FORMATS = {"JPEG", "PNG", "WEBP"}
+ALLOWED_FORMATS = {"JPEG", "PNG", "WEBP", "JFIF"}
 
 
 class InvalidImageError(ValueError):
