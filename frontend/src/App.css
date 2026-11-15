@@ -1,0 +1,17 @@
+body {
+  background-color: #f4f7f6;
+}
+
+.preview-box {
+  max-height: 280px;
+  object-fit: contain;
+  border-radius: 8px;
+  border: 2px dashed #cbd5e1;
+  padding: 8px;
+  background: #fff;
+}
+
+.confidence-bar {
+  height: 22px;
+  border-radius: 6px;
+}
