@@ -1,8 +1,12 @@
 import json
+import os
 
 import tensorflow as tf
+from dotenv import load_dotenv
 from paths import (
-    CLASSES_PATH,
+    CUSTOM_FOOD_CLASSES_PATH,
+    CUSTOM_FOOD_INGREDIENTS,
+    INGREDIENTS_DIR,
     LOG_DIR,
     MODEL_PATH,
     OUTPUT_DIR,
@@ -12,6 +16,8 @@ from paths import (
 from tensorflow.keras import Model, layers
 from tensorflow.keras.applications import MobileNetV2
 
+load_dotenv()
+CUSTOM_CLASSES_ID_OFFSET = int(os.getenv("CUSTOM_CLASSES_ID_OFFSET", "1000"))
 IMAGE_SIZE = (224, 224)
 BATCH_SIZE = 32
 EPOCHS = 15
@@ -32,6 +38,8 @@ def train_model():
     )
 
     class_names = train_ds.class_names
+
+    class_map, ingredients_map = prepare_new_custom_classes_data(class_names)
 
     # loads validation dataset
     validation_ds = tf.keras.utils.image_dataset_from_directory(
@@ -145,14 +153,58 @@ def train_model():
 
     combined_model.save(MODEL_PATH)
 
-    with open(CLASSES_PATH, "w", encoding="utf-8") as file:
-        json.dump(class_names, file, ensure_ascii=False, indent=4)
+    with open(CUSTOM_FOOD_CLASSES_PATH, "w", encoding="utf-8") as classes_file:
+        json.dump(class_map, classes_file, ensure_ascii=False, indent=4)
+
+    with open(CUSTOM_FOOD_INGREDIENTS, "w", encoding="utf-8") as ingredients_file:
+        json.dump(ingredients_map, ingredients_file, ensure_ascii=False, indent=4)
+
+
+def prepare_new_custom_classes_data(new_class_names):
+    if CUSTOM_FOOD_CLASSES_PATH.exists():
+        with open(CUSTOM_FOOD_CLASSES_PATH, "r", encoding="utf-8") as file:
+            class_map_existed = json.load(file)
+    else:
+        class_map_existed = {}
+    new_class_map = {}
+    ingredients_map = {}
+    classes_not_existed = []
+    for class_name in new_class_names:
+        if class_name in class_map_existed.values():
+            idx = next(
+                (
+                    key
+                    for key, value in class_map_existed.items()
+                    if value == class_name
+                ),
+                None,
+            )
+            new_class_map[idx] = class_name
+            ingredients_map[idx] = _load_ingredients_data(class_name)
+            continue
+        classes_not_existed.append(class_name)
+    next_id = (
+        max(map(int, class_map_existed.keys()), default=CUSTOM_CLASSES_ID_OFFSET - 1)
+        + 1
+    )
+    for class_name in classes_not_existed:
+        new_class_map[str(next_id)] = class_name
+        ingredients_map[next_id] = _load_ingredients_data(class_name)
+        next_id += 1
+    return new_class_map, ingredients_map
+
+
+def _load_ingredients_data(class_name):
+    with open(
+        f"{INGREDIENTS_DIR}/{class_name}.json", "r", encoding="utf-8"
+    ) as ingredient_file:
+        return json.load(ingredient_file)
 
 
 def _create_dirs():
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     MODEL_PATH.parent.mkdir(parents=True, exist_ok=True)
-    CLASSES_PATH.parent.mkdir(parents=True, exist_ok=True)
+    CUSTOM_FOOD_CLASSES_PATH.parent.mkdir(parents=True, exist_ok=True)
     LOG_DIR.mkdir(parents=True, exist_ok=True)
 
 

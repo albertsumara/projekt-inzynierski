@@ -35,3 +35,5 @@ python -m machine_learning.train_model
 ```powershell
 python -m pip install datasets pillow pyarrow
 ```
+
+Ingridients are based on - [USDA FoodData Central](https://fdc.nal.usda.gov/food-details/1750341/nutrients)

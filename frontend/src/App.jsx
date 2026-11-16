@@ -1,25 +1,8 @@
 import { useState } from 'react';
 import './App.css';
+import pl from "./translations/pl.json";
 
-const PL_NAMES = {
-  apple: 'Jabłko',
-  granny_smith: 'Jabłko zielone Granny Smith',
-  pear: 'Gruszka',
-  plum: 'Śliwka',
-  red_grapes: 'Czerwone winogrona',
-  tomatoe: 'Pomidor',
-  tomato: 'Pomidor',
-  lemon: 'Cytryna',
-  orange: 'Pomarańcza',
-  banana: 'Banan',
-  strawberry: 'Truskawka',
-  pomegranate: 'Granat',
-  fig: 'Figa',
-  pineapple: 'Ananas',
-  bell_pepper: 'Papryka',
-  cucumber: 'Ogórek',
-  broccoli: 'Brokuł',
-};
+const PL_NAMES = pl;
 
 function App() {
   // Ustawienia endpointu
@@ -259,7 +242,7 @@ function App() {
                           item.class_id ||
                           'Nieznany produkt';
                         const cleanKey = String(rawName).toLowerCase().replace(/^custom_/, '');
-                        const displayName = PL_NAMES[cleanKey] || `🥗 ${rawName}`;
+                        const displayName = PL_NAMES[cleanKey] || `${rawName}`;
 
                         const conf = item.confidence ?? item.probability ?? item.score ?? 0;
                         const percent =
