@@ -1,23 +1,46 @@
+import json
+import math
 import random
 import shutil
 
-from paths import RAW_DIR, TRAIN_DIR, VALIDATION_DIR
+from machine_learning.errors.prepare_dataset_error import (
+    EmptyDatasetClassesError,
+    IngredientsFileNotFoundError,
+    InvalidIngredientsFileError,
+    RawDatasetNotFoundError,
+)
+from paths import INGREDIENTS_DIR, RAW_DIR, TRAIN_DIR, VALIDATION_DIR
 
 VALIDATION_SPLIT = 0.2
 RANDOM_SEED = 42
 
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".jfif", ".png", ".webp"}
 
+REQUIRED_INGREDIENTS_FIELDS = {
+    "calories",
+    "protein",
+    "carbs",
+    "fat",
+    "average_size",
+    "shelf_life",
+}
+
 
 def prepare_dataset():
 
-    if not RAW_DIR.exists():
-        raise FileNotFoundError(f"Wrong path: {RAW_DIR}")
+    _create_dirs()
+    classes, ingredients = _validate_data()
 
-    classes = [directory for directory in RAW_DIR.iterdir() if directory.is_dir()]
+    for class_name, data in ingredients.items():
+        ingredients_path = INGREDIENTS_DIR / f"{class_name}.json"
 
-    if not classes:
-        raise ValueError("No classes found")
+        with open(ingredients_path, "w", encoding="utf-8") as file:
+            json.dump(
+                data,
+                file,
+                ensure_ascii=False,
+                indent=4,
+            )
 
     random_generator = random.Random(RANDOM_SEED)
 
@@ -34,9 +57,7 @@ def prepare_dataset():
         ]
         training_filenames = [_training_filename(image) for image in images]
         if len(training_filenames) != len(set(training_filenames)):
-            raise ValueError(
-                f"Multiple images map to the same filename in {class_dir}"
-            )
+            raise ValueError(f"Multiple images map to the same filename in {class_dir}")
 
         random_generator.shuffle(images)
 
@@ -61,6 +82,71 @@ def _training_filename(image):
     if image.suffix.lower() == ".jfif":
         return image.with_suffix(".jpg").name
     return image.name
+
+
+def _validate_data():
+    if not RAW_DIR.exists():
+        raise RawDatasetNotFoundError(f"Wrong path: {RAW_DIR}")
+
+    classes = sorted(directory for directory in RAW_DIR.iterdir() if directory.is_dir())
+
+    if not classes:
+        raise EmptyDatasetClassesError("No classes found")
+
+    validated_ingredients = {}
+
+    for class_dir in classes:
+        class_name = class_dir.name
+        ingredients_path = class_dir / "ingredients.json"
+
+        if not ingredients_path.is_file():
+            raise IngredientsFileNotFoundError(
+                f"Missing ingredients.json for class: {class_name}"
+            )
+
+        try:
+            with open(ingredients_path, "r", encoding="utf-8") as file:
+                ingredients = json.load(file)
+
+        except (json.JSONDecodeError, OSError) as error:
+            raise InvalidIngredientsFileError(
+                f"Cannot read ingredients.json for {class_name}: {error}"
+            ) from error
+
+        if not isinstance(ingredients, dict):
+            raise InvalidIngredientsFileError(
+                f"Invalid JSON structure for class: {class_name}"
+            )
+
+        missing_fields = REQUIRED_INGREDIENTS_FIELDS - ingredients.keys()
+
+        if missing_fields:
+            raise InvalidIngredientsFileError(
+                f"Missing fields in {class_name}: {missing_fields}"
+            )
+
+        for field in REQUIRED_INGREDIENTS_FIELDS:
+            value = ingredients[field]
+
+            if (
+                isinstance(value, bool)
+                or not isinstance(value, (int, float))
+                or not math.isfinite(value)
+                or value < 0
+            ):
+                raise InvalidIngredientsFileError(
+                    f"Invalid value for '{field}' in class: {class_name}"
+                )
+
+        validated_ingredients[class_name] = ingredients
+
+    return classes, validated_ingredients
+
+
+def _create_dirs():
+    RAW_DIR.mkdir(parents=True, exist_ok=True)
+    VALIDATION_DIR.mkdir(parents=True, exist_ok=True)
+    INGREDIENTS_DIR.mkdir(parents=True, exist_ok=True)
 
 
 if __name__ == "__main__":

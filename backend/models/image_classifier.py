@@ -1,7 +1,7 @@
 import json
 
 import numpy as np
-from paths import CLASSES_PATH, IMAGENET_FOOD_CLASSES, MODEL_PATH
+from paths import CUSTOM_FOOD_CLASSES_PATH, IMAGENET_FOOD_CLASSES_PATH, MODEL_PATH
 from PIL import Image
 
 
@@ -12,8 +12,6 @@ class ImageClassifier:
         self._imagenet_classes = None
         self._decode_recognitions = None
         self._preprocess_input = None
-        # this offset is used because indexes 0...999 are used by imagenet set
-        self.CUSTOM_ID_OFFSET = 1000
 
     def _load_model(self) -> None:
         if self._model is not None:
@@ -31,19 +29,18 @@ class ImageClassifier:
         )
 
         with open(
-            IMAGENET_FOOD_CLASSES, "r", encoding="utf-8"
+            IMAGENET_FOOD_CLASSES_PATH, "r", encoding="utf-8"
         ) as imagenet_classes_file:
             raw_imagenet_classes = json.load(imagenet_classes_file)
             self._imagenet_classes = {
                 int(k): v for k, v in raw_imagenet_classes.items()
             }
 
-        with open(CLASSES_PATH, "r", encoding="utf-8") as file:
-            raw_custom_classes = json.load(file)
-            self._custom_classes = {
-                index + self.CUSTOM_ID_OFFSET: product_name
-                for index, product_name in enumerate(raw_custom_classes)
-            }
+        with open(
+            CUSTOM_FOOD_CLASSES_PATH, "r", encoding="utf-8"
+        ) as custom_classes_file:
+            raw_custom_classes = json.load(custom_classes_file)
+            self._custom_classes = {int(k): v for k, v in raw_custom_classes.items()}
 
         self._decode_recognitions = decode_predictions
         self._preprocess_input = preprocess_input
@@ -82,15 +79,15 @@ class ImageClassifier:
 
         custom_scores = custom_probabilities[0]
 
-        for custom_class_index, product_label in self._custom_classes.items():
+        for output_index, (custom_class_id, product_label) in enumerate(
+            self._custom_classes.items()
+        ):
             results.append(
                 {
-                    "class_id": str(custom_class_index),
+                    "class_id": str(custom_class_id),
                     "product": product_label,
                     "confidence": round(
-                        float(
-                            custom_scores[custom_class_index - self.CUSTOM_ID_OFFSET]
-                        ),
+                        float(custom_scores[output_index]),
                         4,
                     ),
                 }
