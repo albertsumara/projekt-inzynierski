@@ -5,7 +5,8 @@ import tensorflow as tf
 from dotenv import load_dotenv
 from paths import (
     CUSTOM_FOOD_CLASSES_PATH,
-    CUSTOM_FOOD_INGREDIENTS,
+    CUSTOM_FOOD_INGREDIENTS_PATH,
+    ENV_CONFIGURATION_PATH,
     INGREDIENTS_DIR,
     LOG_DIR,
     MODEL_PATH,
@@ -16,6 +17,7 @@ from paths import (
 from tensorflow.keras import Model, layers
 from tensorflow.keras.applications import MobileNetV2
 
+load_dotenv(ENV_CONFIGURATION_PATH)
 load_dotenv()
 CUSTOM_CLASSES_ID_OFFSET = int(os.getenv("CUSTOM_CLASSES_ID_OFFSET", "1000"))
 IMAGE_SIZE = (224, 224)
@@ -156,7 +158,7 @@ def train_model():
     with open(CUSTOM_FOOD_CLASSES_PATH, "w", encoding="utf-8") as classes_file:
         json.dump(class_map, classes_file, ensure_ascii=False, indent=4)
 
-    with open(CUSTOM_FOOD_INGREDIENTS, "w", encoding="utf-8") as ingredients_file:
+    with open(CUSTOM_FOOD_INGREDIENTS_PATH, "w", encoding="utf-8") as ingredients_file:
         json.dump(ingredients_map, ingredients_file, ensure_ascii=False, indent=4)
 
 
