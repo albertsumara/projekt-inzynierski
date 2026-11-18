@@ -2,7 +2,9 @@ import { useState } from 'react';
 import './App.css';
 import pl from "./translations/pl.json";
 
-const PL_NAMES = pl;
+const PL_NAMES = Object.fromEntries(
+  Object.entries(pl).map(([key, value]) => [key.toLowerCase(), value])
+);
 
 function App() {
   const [showConfig, setShowConfig] = useState(false);

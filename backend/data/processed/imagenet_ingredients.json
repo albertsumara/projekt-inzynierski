@@ -63,14 +63,6 @@
         "average_size": 85,
         "shelf_life": 2
     },
-    "312": {
-        "calories": 455,
-        "protein": 60,
-        "carbs": 13,
-        "fat": 16,
-        "average_size": 5,
-        "shelf_life": 180
-    },
     "341": {
         "calories": 292,
         "protein": 23.28,
@@ -87,14 +79,6 @@
         "average_size": 140,
         "shelf_life": 4
     },
-    "346": {
-        "calories": 99,
-        "protein": 20.39,
-        "carbs": 0,
-        "fat": 1.37,
-        "average_size": 140,
-        "shelf_life": 4
-    },
     "348": {
         "calories": 294,
         "protein": 24.52,
@@ -102,14 +86,6 @@
         "fat": 20.94,
         "average_size": 140,
         "shelf_life": 4
-    },
-    "390": {
-        "calories": 236,
-        "protein": 23.65,
-        "carbs": 0,
-        "fat": 14.95,
-        "average_size": 100,
-        "shelf_life": 2
     },
     "391": {
         "calories": 140,
@@ -119,36 +95,12 @@
         "average_size": 170,
         "shelf_life": 2
     },
-    "394": {
-        "calories": 105,
-        "protein": 16.14,
-        "carbs": 0,
-        "fat": 4.04,
-        "average_size": 170,
-        "shelf_life": 2
-    },
     "440": {
         "calories": 43,
         "protein": 0.46,
         "carbs": 3.55,
         "fat": 0,
         "average_size": 355,
-        "shelf_life": 180
-    },
-    "441": {
-        "calories": 43,
-        "protein": 0.46,
-        "carbs": 3.55,
-        "fat": 0,
-        "average_size": 355,
-        "shelf_life": 1
-    },
-    "509": {
-        "calories": 394,
-        "protein": 0,
-        "carbs": 98,
-        "fat": 0.2,
-        "average_size": 40,
         "shelf_life": 180
     },
     "542": {
@@ -190,22 +142,6 @@
         "fat": 0,
         "average_size": 240,
         "shelf_life": 365
-    },
-    "926": {
-        "calories": 90,
-        "protein": 5,
-        "carbs": 8,
-        "fat": 4,
-        "average_size": 400,
-        "shelf_life": 4
-    },
-    "927": {
-        "calories": 222,
-        "protein": 4.5,
-        "carbs": 32,
-        "fat": 9.5,
-        "average_size": 150,
-        "shelf_life": 3
     },
     "928": {
         "calories": 207,
@@ -335,14 +271,6 @@
         "average_size": 200,
         "shelf_life": 7
     },
-    "944": {
-        "calories": 53,
-        "protein": 2.89,
-        "carbs": 11.95,
-        "fat": 0.34,
-        "average_size": 120,
-        "shelf_life": 5
-    },
     "945": {
         "calories": 26,
         "protein": 0.99,
@@ -350,14 +278,6 @@
         "fat": 0.3,
         "average_size": 119,
         "shelf_life": 7
-    },
-    "946": {
-        "calories": 17,
-        "protein": 0.7,
-        "carbs": 4.07,
-        "fat": 0.1,
-        "average_size": 50,
-        "shelf_life": 5
     },
     "947": {
         "calories": 22,
@@ -422,22 +342,6 @@
         "fat": 0.33,
         "average_size": 118,
         "shelf_life": 5
-    },
-    "955": {
-        "calories": 95,
-        "protein": 1.72,
-        "carbs": 23.25,
-        "fat": 0.64,
-        "average_size": 165,
-        "shelf_life": 5
-    },
-    "956": {
-        "calories": 101,
-        "protein": 1.7,
-        "carbs": 25.2,
-        "fat": 0.6,
-        "average_size": 200,
-        "shelf_life": 2
     },
     "957": {
         "calories": 83,
@@ -519,22 +423,6 @@
         "average_size": 30,
         "shelf_life": 1
     },
-    "969": {
-        "calories": 88,
-        "protein": 4.55,
-        "carbs": 8.05,
-        "fat": 4.19,
-        "average_size": 240,
-        "shelf_life": 3
-    },
-    "984": {
-        "calories": 884,
-        "protein": 0,
-        "carbs": 0,
-        "fat": 100,
-        "average_size": 14,
-        "shelf_life": 365
-    },
     "987": {
         "calories": 96,
         "protein": 3.41,
@@ -542,22 +430,6 @@
         "fat": 1.5,
         "average_size": 90,
         "shelf_life": 4
-    },
-    "989": {
-        "calories": 162,
-        "protein": 1.6,
-        "carbs": 38.22,
-        "fat": 0.34,
-        "average_size": 100,
-        "shelf_life": 5
-    },
-    "992": {
-        "calories": 22,
-        "protein": 3.09,
-        "carbs": 3.26,
-        "fat": 0.34,
-        "average_size": 70,
-        "shelf_life": 5
     },
     "996": {
         "calories": 31,
