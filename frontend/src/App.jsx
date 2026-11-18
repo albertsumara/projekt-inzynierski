@@ -18,9 +18,13 @@ function App() {
   const [responseFilename, setResponseFilename] = useState('');
   const [hasAnalyzed, setHasAnalyzed] = useState(false);
 
-  // Lista zatwierdzonych składników i stan dla ręcznego wpisywania
+  // Wirtualna spiżarnia
   const [approvedList, setApprovedList] = useState([]);
   const [manualIngredient, setManualIngredient] = useState('');
+
+  // Stan dla przepisów (zaślepki)
+  const [recipes, setRecipes] = useState([]);
+  const [isSearchingRecipes, setIsSearchingRecipes] = useState(false);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -89,13 +93,48 @@ function App() {
     setApprovedList(approvedList.filter((_, idx) => idx !== idxToRemove));
   };
 
-  // Ręczne dodawanie z pola tekstowego
   const handleManualAdd = () => {
     const trimmed = manualIngredient.trim();
     if (trimmed) {
       addIngredient(trimmed);
-      setManualIngredient(''); // Czyści pole po poprawnym dodaniu
+      setManualIngredient('');
     }
+  };
+
+  // Symulacja wyszukiwania przepisów
+  const handleSearchRecipes = () => {
+    setIsSearchingRecipes(true);
+    
+    // Symulacja opóźnienia serwera (1.5 sekundy), żeby wyglądało realistycznie
+    setTimeout(() => {
+      setRecipes([
+        {
+          id: 1,
+          name: 'Ekspresowa sałatka owocowo-warzywna',
+          time: '10 min',
+          difficulty: 'Bardzo łatwe',
+          missing: ['Oliwa z oliwek', 'Orzechy włoskie'],
+          emoji: '🥗'
+        },
+        {
+          id: 2,
+          name: 'Pożywna owsianka na mleku',
+          time: '15 min',
+          difficulty: 'Łatwe',
+          missing: ['Płatki owsiane', 'Cynamon', 'Miód'],
+          emoji: '🥣'
+        },
+        {
+          id: 3,
+          name: 'Domowa tarta rustykalna',
+          time: '45 min',
+          difficulty: 'Średnie',
+          missing: ['Ciasto francuskie', 'Jajka', 'Śmietana 30%'],
+          emoji: '🥧'
+        }
+      ]);
+      setIsSearchingRecipes(false);
+    }, 1500);
   };
 
   return (
@@ -111,7 +150,7 @@ function App() {
         </div>
       </nav>
 
-      <div className="container">
+      <div className="container pb-5">
         {showConfig && (
           <div className="mb-3">
             <div className="card card-body border-0 shadow-sm bg-white">
@@ -132,7 +171,7 @@ function App() {
         <div className="row g-4">
           <div className="col-md-6">
             <div className="card border-0 shadow-sm h-100">
-              <div className="card-header bg-white fw-bold py-3">Prześlij zdjęcie produktu spożywczego</div>
+              <div className="card-header bg-white fw-bold py-3">1. Prześlij zdjęcie produktu spożywczego</div>
               <div className="card-body d-flex flex-column justify-content-between">
                 <div>
                   <p className="text-muted small mb-2">Obsługiwane formaty: <strong>JPEG/JFIF, PNG, WEBP</strong> (maks. 8 MB)</p>
@@ -247,6 +286,61 @@ function App() {
             </div>
           </div>
         </div>
+
+        {/* PRZYCISK WYSZUKIWANIA I KARTY PRZEPISÓW */}
+        <div className="row mt-4">
+          <div className="col-12 text-center">
+            <button 
+              className="btn btn-lg btn-warning fw-bold px-5 shadow-sm"
+              onClick={handleSearchRecipes}
+              disabled={isSearchingRecipes || approvedList.length === 0}
+            >
+              {isSearchingRecipes ? (
+                <><span className="spinner-border spinner-border-sm me-2"></span> Szukam najlepszych przepisów...</>
+              ) : (
+                'Szukaj przepisów z tych składników 🍽️'
+              )}
+            </button>
+            {approvedList.length === 0 && (
+              <div className="text-muted small mt-2">Dodaj przynajmniej jeden składnik do spiżarni, aby wyszukać przepisy.</div>
+            )}
+          </div>
+        </div>
+
+        {recipes.length > 0 && (
+          <div className="row mt-4 g-4">
+            <div className="col-12">
+              <h4 className="fw-bold text-success mb-3">3. Rekomendowane przepisy dla Ciebie</h4>
+            </div>
+            {recipes.map((recipe) => (
+              <div key={recipe.id} className="col-md-4">
+                <div className="card h-100 border-0 shadow-sm recipe-card">
+                  <div className="card-body text-center pb-2">
+                    <div className="display-1 mb-3">{recipe.emoji}</div>
+                    <h5 className="card-title fw-bold">{recipe.name}</h5>
+                    <div className="d-flex justify-content-center gap-3 text-muted small mb-3">
+                      <span>⏱️ {recipe.time}</span>
+                      <span>📊 {recipe.difficulty}</span>
+                    </div>
+                  </div>
+                  <div className="card-footer bg-white border-top-0 pt-0">
+                    <div className="small fw-bold text-danger mb-1">Brakujące składniki:</div>
+                    <div className="d-flex flex-wrap gap-1">
+                      {recipe.missing.map((miss, idx) => (
+                        <span key={idx} className="badge bg-light text-danger border border-danger">
+                          {miss}
+                        </span>
+                      ))}
+                    </div>
+                    <button className="btn btn-outline-success w-100 mt-3 btn-sm fw-bold">
+                      Zobacz pełny przepis
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </>
   );
