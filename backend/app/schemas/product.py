@@ -6,15 +6,20 @@ from app.schemas import FilterOperator, SortOrder
 from app.schemas.ingredients import Ingredients
 
 
-class RecognitionProduct(BaseModel):
-    class_id: str
-    product: str
+class Recognition(BaseModel):
+    id_ml: int
     confidence: float = Field(ge=0.0, le=1.0)
 
 
-class RecognitionResponse(BaseModel):
+class RecognizedProduct(BaseModel):
+    id: int
+    name: str
+    confidence: float = Field(ge=0.0, le=1.0)
+
+
+class RecognizeProductResponse(BaseModel):
     filename: str
-    recognitions: list[RecognitionProduct]
+    recognitions: list[RecognizedProduct]
 
 
 class Product(BaseModel):

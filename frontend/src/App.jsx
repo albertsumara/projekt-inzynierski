@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import plTranslations from "./translations/pl.json";
-import recipesData from "./data/recipes.json";
+import recipesData from "./data/receipes.json";
 
 const STORAGE_PROFILE_KEY = "diet_app_user_profile_v1";
 const STORAGE_LOG_KEY = "diet_app_daily_log_v1";
@@ -26,7 +26,7 @@ export default function App() {
   // api
   const [showSettings, setShowSettings] = useState(false);
   const [endpointUrl, setEndpointUrl] = useState(
-    "http://127.0.0.1:8000/api/v1/product/recognize"
+    "http://127.0.0.1:8000/api/v1/product/recognize",
   );
   const [fileParamName, setFileParamName] = useState("file");
 
@@ -83,7 +83,7 @@ export default function App() {
     try {
       localStorage.setItem(
         STORAGE_LOG_KEY,
-        JSON.stringify({ date: getTodayKey(), meals: eatenMeals })
+        JSON.stringify({ date: getTodayKey(), meals: eatenMeals }),
       );
     } catch {
       // ignores reading errors
@@ -106,7 +106,7 @@ export default function App() {
   const [hasSearched, setHasSearched] = useState(false);
   const [expandedRecipeId, setExpandedRecipeId] = useState(null);
 
-  // calories calculator MIFFLIN-ST JEOR 
+  // calories calculator MIFFLIN-ST JEOR
   const dailyTargetKcal = useMemo(() => {
     const w = Number(profile.weight) || 70;
     const h = Number(profile.height) || 175;
@@ -133,7 +133,7 @@ export default function App() {
         fat: acc.fat + (Number(meal.fat) || 0),
         carbs: acc.carbs + (Number(meal.carbs) || 0),
       }),
-      { calories: 0, protein: 0, fat: 0, carbs: 0 }
+      { calories: 0, protein: 0, fat: 0, carbs: 0 },
     );
   }, [eatenMeals]);
 
@@ -150,7 +150,12 @@ export default function App() {
       return { targetMealKcal: remainingKcal, wasCappedByRemaining: true };
     }
     return { targetMealKcal: rawTarget, wasCappedByRemaining: false };
-  }, [profile.mealType, profile.customMealKcal, dailyTargetKcal, remainingKcal]);
+  }, [
+    profile.mealType,
+    profile.customMealKcal,
+    dailyTargetKcal,
+    remainingKcal,
+  ]);
 
   const updateProfile = (field, value) => {
     setProfile((prev) => ({ ...prev, [field]: value }));
@@ -171,7 +176,9 @@ export default function App() {
     const normalized = rawClass.toLowerCase().trim();
     if (plTranslations[rawClass]) return plTranslations[rawClass];
     if (plTranslations[normalized]) return plTranslations[normalized];
-    return rawClass.charAt(0).toUpperCase() + rawClass.slice(1).replace(/_/g, " ");
+    return (
+      rawClass.charAt(0).toUpperCase() + rawClass.slice(1).replace(/_/g, " ")
+    );
   };
 
   const handleRecognize = async () => {
@@ -207,14 +214,14 @@ export default function App() {
 
       if (rawList.length === 0) {
         setApiError(
-          `Serwer odpowiedział, ale nie znaleziono listy predykcji: ${JSON.stringify(data)}`
+          `Serwer odpowiedział, ale nie znaleziono listy predykcji: ${JSON.stringify(data)}`,
         );
       }
       setPredictions(rawList);
     } catch (err) {
       setApiError(
         err.message ||
-          "Nie udało się połączyć z backendem. Możesz dodać składniki ręcznie poniżej."
+          "Nie udało się połączyć z backendem. Możesz dodać składniki ręcznie poniżej.",
       );
     } finally {
       setIsAnalyzing(false);
@@ -230,7 +237,7 @@ export default function App() {
     setPantry((prev) =>
       prev.some((p) => p.toLowerCase() === formatted.toLowerCase())
         ? prev
-        : [...prev, formatted]
+        : [...prev, formatted],
     );
   };
 
@@ -275,7 +282,7 @@ export default function App() {
           ? recipe.ingredients
           : [];
         const ingredientNames = rawIngredients.map((ing) =>
-          typeof ing === "string" ? ing : ing.name
+          typeof ing === "string" ? ing : ing.name,
         );
 
         const matched = [];
@@ -293,7 +300,7 @@ export default function App() {
                 p.stem.length >= 4 &&
                 (ingStem === p.stem ||
                   ingStem.startsWith(p.stem) ||
-                  p.stem.startsWith(ingStem)))
+                  p.stem.startsWith(ingStem))),
           );
 
           if (hasIt) matched.push(ingName);
@@ -307,11 +314,11 @@ export default function App() {
         const kcalDiff = Math.abs(recipeKcal - targetMealKcal);
         const kcalScore = Math.max(
           0,
-          1 - kcalDiff / Math.max(targetMealKcal, 300)
+          1 - kcalDiff / Math.max(targetMealKcal, 300),
         );
 
         const matchPercent = Math.round(
-          (ingredientRatio * 0.7 + kcalScore * 0.3) * 100
+          (ingredientRatio * 0.7 + kcalScore * 0.3) * 100,
         );
 
         return {
@@ -359,7 +366,7 @@ export default function App() {
 
   const progressPercent = Math.min(
     100,
-    Math.round((consumedTotals.calories / dailyTargetKcal) * 100)
+    Math.round((consumedTotals.calories / dailyTargetKcal) * 100),
   );
   const isOverLimit = remainingKcal < 0;
 
@@ -391,7 +398,9 @@ export default function App() {
                 />
               </div>
               <div>
-                <label style={styles.label}>Nazwa parametru pliku w FastAPI:</label>
+                <label style={styles.label}>
+                  Nazwa parametru pliku w FastAPI:
+                </label>
                 <input
                   type="text"
                   value={fileParamName}
@@ -453,7 +462,9 @@ export default function App() {
               <label style={styles.smallLabel}>Aktywność</label>
               <select
                 value={profile.activity}
-                onChange={(e) => updateProfile("activity", Number(e.target.value))}
+                onChange={(e) =>
+                  updateProfile("activity", Number(e.target.value))
+                }
                 style={styles.input}
               >
                 <option value={1.2}>Niska (praca siedząca)</option>
@@ -547,12 +558,16 @@ export default function App() {
                 <strong>Dzienna pula ({getTodayKey()}): </strong>
                 <span>
                   Zjedzono{" "}
-                  <strong style={{ color: isOverLimit ? "#dc2626" : "#2e7d32" }}>
+                  <strong
+                    style={{ color: isOverLimit ? "#dc2626" : "#2e7d32" }}
+                  >
                     {consumedTotals.calories}
                   </strong>{" "}
                   / {dailyTargetKcal} kcal
                 </span>
-                <span style={{ marginLeft: 12, color: "#475569", fontSize: 13 }}>
+                <span
+                  style={{ marginLeft: 12, color: "#475569", fontSize: 13 }}
+                >
                   (B: {consumedTotals.protein}g | T: {consumedTotals.fat}g | W:{" "}
                   {consumedTotals.carbs}g)
                 </span>
@@ -613,7 +628,9 @@ export default function App() {
                         ({m.mealTypeLabel}, {m.time})
                       </span>
                     </span>
-                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <div
+                      style={{ display: "flex", alignItems: "center", gap: 10 }}
+                    >
                       <span style={{ fontWeight: 600, fontSize: 13 }}>
                         {m.calories} kcal
                       </span>
@@ -639,7 +656,8 @@ export default function App() {
               1. Prześlij zdjęcie produktu spożywczego
             </h2>
             <p style={styles.hint}>
-              Obsługiwane formaty: <strong>JPEG/JFIF, PNG, WEBP</strong> (maks. 8 MB)
+              Obsługiwane formaty: <strong>JPEG/JFIF, PNG, WEBP</strong> (maks.
+              8 MB)
             </p>
 
             <input
@@ -665,7 +683,8 @@ export default function App() {
               style={{
                 ...styles.primaryBtn,
                 opacity: !selectedFile || isAnalyzing ? 0.65 : 1,
-                cursor: !selectedFile || isAnalyzing ? "not-allowed" : "pointer",
+                cursor:
+                  !selectedFile || isAnalyzing ? "not-allowed" : "pointer",
               }}
             >
               {isAnalyzing ? "Analizowanie..." : "🔍 Rozpoznaj produkt"}
@@ -674,7 +693,9 @@ export default function App() {
 
           <section style={styles.card}>
             <div style={styles.cardHeaderRow}>
-              <h2 style={styles.cardTitle}>2. Wynik analizy i Twoja spiżarnia</h2>
+              <h2 style={styles.cardTitle}>
+                2. Wynik analizy i Twoja spiżarnia
+              </h2>
               {selectedFile && (
                 <span style={styles.fileBadge}>Plik: {selectedFile.name}</span>
               )}
@@ -691,7 +712,9 @@ export default function App() {
             {!isAnalyzing && predictions.length > 0 && (
               <div>
                 <h3 style={styles.greenSubtitle}>Rozpoznane opcje:</h3>
-                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <div
+                  style={{ display: "flex", flexDirection: "column", gap: 8 }}
+                >
                   {predictions.map((pred, idx) => {
                     const rawName =
                       typeof pred === "string"
@@ -705,7 +728,7 @@ export default function App() {
                     const plName = translateLabel(rawName);
                     const rawConf =
                       typeof pred === "object" && pred !== null
-                        ? pred.confidence ?? pred.probability ?? pred.score
+                        ? (pred.confidence ?? pred.probability ?? pred.score)
                         : undefined;
                     const conf =
                       rawConf !== undefined
@@ -782,7 +805,8 @@ export default function App() {
               <div style={styles.pantryBox}>
                 {pantry.length === 0 ? (
                   <span style={{ color: "#64748b", fontSize: 14 }}>
-                    Spiżarnia jest pusta. Dodaj coś ze zdjęcia lub wpisz ręcznie.
+                    Spiżarnia jest pusta. Dodaj coś ze zdjęcia lub wpisz
+                    ręcznie.
                   </span>
                 ) : (
                   pantry.map((item) => (
@@ -818,7 +842,8 @@ export default function App() {
           </button>
           {pantry.length === 0 && (
             <p style={{ color: "#64748b", fontSize: 13, marginTop: 6 }}>
-              Dodaj przynajmniej jeden składnik do spiżarni, aby wyszukać przepisy.
+              Dodaj przynajmniej jeden składnik do spiżarni, aby wyszukać
+              przepisy.
             </p>
           )}
         </div>
