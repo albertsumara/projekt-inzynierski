@@ -17,3 +17,8 @@ class ProductDb(Base):
         uselist=False,
         cascade="all, delete-orphan",
     )
+
+    users_products = relationship(
+        "UsersProductsDb",
+        back_populates="product",
+    )

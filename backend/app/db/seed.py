@@ -10,10 +10,17 @@ from sqlalchemy.orm import Session
 
 from app.db.models import ProductDb
 from app.mappers.product_mapper import ProductMapper
+from app.mappers.user_mapper import UserMapper
 from app.schemas.product import AddProductRequest
+from app.schemas.user import User
 
 
-def seed_products(db: Session) -> None:
+def seed_data(db: Session):
+    _seed_products(db)
+    _seed_users(db)
+
+
+def _seed_products(db: Session):
     try:
         _seed_from_json(
             db,
@@ -34,11 +41,19 @@ def seed_products(db: Session) -> None:
         raise
 
 
+def _seed_users(db: Session):
+    test_user_data = {"name": "Test User"}
+    test_user_schema = User.model_validate(test_user_data)
+    test_user = UserMapper.to_create_user(test_user_schema)
+    db.add(test_user)
+    db.commit()
+
+
 def _seed_from_json(
     db: Session,
     classes_path,
     ingredients_path,
-) -> None:
+):
 
     with classes_path.open("r", encoding="utf-8") as file:
         classes_data = json.load(file)

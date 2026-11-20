@@ -1,9 +1,11 @@
-from models.image_classifier import ImageClassifier
+from fastapi import HTTPException, UploadFile, status
+from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError as SQLAlchemyIntegrityError
 from sqlalchemy.orm import Session
 
 from app.db.models.ingredients import IngredientsDb
 from app.db.models.product import ProductDb
+from app.errors.image_errors import ImageError
 from app.errors.product_errors import (
     ProductDbError,
     ProductNameAlreadyExistsError,
@@ -14,27 +16,37 @@ from app.schemas.product import (
     ListProductsRequest,
     ProductFilters,
     ProductSortField,
+    Recognition,
+    RecognizeProductResponse,
 )
-from app.services.image_service import ImageService
+from app.services.image_service import ImageService, InvalidImageError
 from app.utils.database import raise_for_constraint
 
 
 class ProductService:
-    def __init__(self, image_service: ImageService, image_classifier: ImageClassifier):
+    def __init__(self, image_service: ImageService):
         self.image_service = image_service
-        self.image_classifier = image_classifier
 
-    def recognize_product(
-        self,
-        image_bytes: bytes,
-        content_type: str | None,
-    ) -> list[dict]:
-        image = self.image_service.load_image(
-            image_bytes,
-            content_type,
-        )
-
-        return self.image_classifier.recognize(image)
+    async def recognize_product(
+        self, file: UploadFile, db: Session
+    ) -> RecognizeProductResponse:
+        try:
+            image_bytes = await file.read()
+            recognitions = self.image_service.recognize(
+                image_bytes,
+                file.content_type,
+            )
+            recognitions_dto = self._get_recognized_products(recognitions, db)
+            return ProductMapper.to_recognition_response(
+                file.filename, recognitions_dto
+            )
+        except (ImageError, InvalidImageError) as exc:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=str(exc),
+            ) from exc
+        finally:
+            await file.close()
 
     @staticmethod
     def add_product(product, db: Session):
@@ -56,8 +68,32 @@ class ProductService:
             raise ProductDbError("Database error.") from e
 
     @staticmethod
-    def list_products(params: ListProductsRequest, db: Session):
+    def get_product_by_id_ml(id_ml: int, db: Session):
+        query = select(ProductDb).where(ProductDb.id_ml == id_ml)
+        return db.execute(query).scalar_one_or_none()
 
+    @staticmethod
+    def _get_recognized_products(
+        recognitions: Recognition,
+        db: Session,
+    ):
+        ids_ml = [r.id_ml for r in recognitions]
+
+        query = select(ProductDb).where(ProductDb.id_ml.in_(ids_ml))
+        products = db.execute(query).scalars().all()
+        products_map = {p.id_ml: p for p in products}
+
+        return [
+            ProductMapper.to_recognition(
+                products_map[recognition.id_ml],
+                recognition.confidence,
+            )
+            for recognition in recognitions
+            if recognition.id_ml in products_map
+        ]
+
+    @staticmethod
+    def list_products(params: ListProductsRequest, db: Session):
         query = db.query(ProductDb).join(ProductDb.ingredients)
 
         if params and params.filters:

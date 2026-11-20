@@ -1,5 +1,6 @@
 from io import BytesIO
 
+from models.image_classifier import ImageClassifier
 from PIL import Image, UnidentifiedImageError
 
 from app.errors.image_errors import (
@@ -8,6 +9,7 @@ from app.errors.image_errors import (
     InvalidImageFormatError,
     InvalidImageSizeError,
 )
+from app.schemas.product import Recognition
 
 MAX_IMAGE_SIZE = 8 * 1024 * 1024
 
@@ -26,6 +28,20 @@ class InvalidImageError(ValueError):
 
 
 class ImageService:
+    def __init__(self, image_classifier: ImageClassifier | None = None) -> None:
+        self.image_classifier = image_classifier or ImageClassifier()
+
+    def recognize(
+        self,
+        image_bytes: bytes,
+        content_type: str | None,
+    ) -> list[Recognition]:
+        image = self.load_image(image_bytes, content_type)
+        return [
+            Recognition.model_validate(recognition)
+            for recognition in self.image_classifier.recognize(image)
+        ]
+
     def load_image(
         self,
         image_bytes: bytes,

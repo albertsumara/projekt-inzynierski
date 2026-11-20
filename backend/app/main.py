@@ -5,18 +5,19 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from app.api.routes import product_router
+from app.api.routes import product_router, user_router
 from app.db.database import SessionLocal, engine, get_db
-from app.db.models import Base, IngredientsDb, ProductDb
-from app.db.seed import seed_products
+from app.db.models import Base
+from app.db.seed import seed_data
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
     db = SessionLocal()
     try:
-        seed_products(db)
+        seed_data(db)
     finally:
         db.close()
     yield
@@ -52,4 +53,10 @@ app.include_router(
     product_router,
     prefix="/api/v1",
     tags=["Products"],
+)
+
+app.include_router(
+    user_router,
+    prefix="/api/v1",
+    tags=["Users"],
 )
