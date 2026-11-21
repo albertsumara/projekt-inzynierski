@@ -3,15 +3,15 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError as SQLAlchemyIntegrityError
 from sqlalchemy.orm import Session
 
-from app.db.models.ingredients import IngredientsDb
-from app.db.models.product import ProductDb
+from app.db.models.ingredients_db import IngredientsDb
+from app.db.models.product_db import ProductDb
 from app.errors.image_errors import ImageError
 from app.errors.product_errors import (
     ProductDbError,
     ProductNameAlreadyExistsError,
 )
 from app.mappers import ProductMapper
-from app.schemas import FilterOperator, SortOrder
+from app.schemas import SortOrder
 from app.schemas.product import (
     ListProductsRequest,
     ProductFilters,
@@ -19,12 +19,17 @@ from app.schemas.product import (
     Recognition,
     RecognizeProductResponse,
 )
-from app.services.image_service import ImageService, InvalidImageError
+from app.services.image_service import InvalidImageError
+from app.services.interfaces.image_service_interface import ImageServiceInterface
+from app.services.interfaces.product_service_interface import (
+    ProductServiceInterface,
+)
 from app.utils.database import raise_for_constraint
+from app.utils.filters import apply_number_filter
 
 
-class ProductService:
-    def __init__(self, image_service: ImageService):
+class ProductService(ProductServiceInterface):
+    def __init__(self, image_service: ImageServiceInterface):
         self.image_service = image_service
 
     async def recognize_product(
@@ -117,14 +122,7 @@ class ProductService:
                 if number_filter is None:
                     continue
 
-                if number_filter.operator == FilterOperator.MORE:
-                    query = query.filter(column > number_filter.value)
-
-                elif number_filter.operator == FilterOperator.LESS:
-                    query = query.filter(column < number_filter.value)
-
-                elif number_filter.operator == FilterOperator.EQUALS:
-                    query = query.filter(column == number_filter.value)
+                query = apply_number_filter(query, column, number_filter)
 
         if params and params.sort:
             sort_columns = {

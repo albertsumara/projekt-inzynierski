@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import plTranslations from "./translations/pl.json";
-import recipesData from "./data/receipes.json";
+import recipesData from "./data/recipes.json";
 
 const STORAGE_PROFILE_KEY = "diet_app_user_profile_v1";
 const STORAGE_LOG_KEY = "diet_app_daily_log_v1";

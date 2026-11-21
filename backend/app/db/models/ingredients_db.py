@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Double, ForeignKey, Integer
 from sqlalchemy.orm import relationship
 
-from .base import Base
+from .base_db import Base
 
 
 class IngredientsDb(Base):

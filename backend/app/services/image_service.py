@@ -5,11 +5,13 @@ from PIL import Image, UnidentifiedImageError
 
 from app.errors.image_errors import (
     EmptyImageFileError,
+    ImageError,
     InvalidImageContentTypeError,
     InvalidImageFormatError,
     InvalidImageSizeError,
 )
 from app.schemas.product import Recognition
+from app.services.interfaces.image_service_interface import ImageServiceInterface
 
 MAX_IMAGE_SIZE = 8 * 1024 * 1024
 
@@ -23,11 +25,11 @@ ALLOWED_CONTENT_TYPES = {
 ALLOWED_FORMATS = {"JPEG", "PNG", "WEBP", "JFIF"}
 
 
-class InvalidImageError(ValueError):
+class InvalidImageError(ImageError):
     pass
 
 
-class ImageService:
+class ImageService(ImageServiceInterface):
     def __init__(self, image_classifier: ImageClassifier | None = None) -> None:
         self.image_classifier = image_classifier or ImageClassifier()
 
