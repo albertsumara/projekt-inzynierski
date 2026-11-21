@@ -31,11 +31,11 @@ class ProductMapper:
     @staticmethod
     def to_ingredients(data: Ingredients):
         return IngredientsDb(
-            calories=data.calories,
-            protein=data.protein,
-            carbs=data.carbs,
-            fat=data.fat,
-            average_size=data.average_size,
+            calories=round(data.calories, 2),
+            protein=round(data.protein, 2),
+            carbs=round(data.carbs, 2),
+            fat=round(data.fat, 2),
+            average_size=round(data.average_size, 2),
             shelf_life=data.shelf_life,
         )
 
@@ -44,5 +44,6 @@ class ProductMapper:
         return ProductDb(
             id_ml=data.product.id_ml,
             name=data.product.name,
+            measurement_type=data.product.measurement_type,
             ingredients=ProductMapper.to_ingredients(data.product.ingredients),
         )

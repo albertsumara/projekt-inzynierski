@@ -1,0 +1,171 @@
+[
+  {
+    "name": "Klasyczne naleśniki z jabłkami",
+    "time": 25,
+    "difficulty": "easy",
+    "is_vegetarian": true,
+    "is_gluten_free": false,
+    "instruction": "Wymieszaj mąkę z mlekiem na gładkie ciasto. Usmaż cienkie naleśniki na roztopionym maśle i podawaj z pokrojonymi w plastry jabłkami.",
+    "ingredients": [
+      { "id_ml": 1002, "quantity_measurement": 76 },
+      { "id_ml": 1003, "quantity_measurement": 200 },
+      { "id_ml": 1001, "quantity_measurement": 10 },
+      { "id_ml": 1000, "quantity": 2 }
+    ]
+  },
+  {
+    "name": "Szarlotka na patelni (crumble jabłkowo-gruszkowy)",
+    "time": 20,
+    "difficulty": "easy",
+    "is_vegetarian": true,
+    "is_gluten_free": false,
+    "instruction": "Pokrój jabłko i gruszkę w kostkę, duś na maśle przez 8 minut. Z mąki i masła rozetrzyj kruszonkę, posyp owoce i podpiecz pod przykryciem.",
+    "ingredients": [
+      { "id_ml": 1000, "quantity": 1 },
+      { "id_ml": 1004, "quantity": 1 },
+      { "id_ml": 1002, "quantity_measurement": 65 },
+      { "id_ml": 1001, "quantity_measurement": 25 }
+    ]
+  },
+  {
+    "name": "Kremowy sos pomidorowy na maśle",
+    "time": 15,
+    "difficulty": "easy",
+    "is_vegetarian": true,
+    "is_gluten_free": false,
+    "instruction": "Rozpuść masło na patelni, dodaj mąkę i zrób jasną zasmażkę. Wlej mleko oraz pokrojone pomidory i duś pod przykryciem przez 10 minut.",
+    "ingredients": [
+      { "id_ml": 1007, "quantity": 3 },
+      { "id_ml": 1001, "quantity_measurement": 20 },
+      { "id_ml": 1002, "quantity_measurement": 20 },
+      { "id_ml": 1003, "quantity_measurement": 100 }
+    ]
+  },
+  {
+    "name": "Sałatka owocowa z jabłkiem, gruszką, śliwką i winogronami",
+    "time": 10,
+    "difficulty": "easy",
+    "is_vegetarian": true,
+    "is_gluten_free": true,
+    "instruction": "Umyj owoce, usuń gniazda nasienne oraz pestki ze śliwek, pokrój wszystko w kostkę, skrop sokiem z cytryny i wymieszaj.",
+    "ingredients": [
+      { "id_ml": 1000 },
+      { "id_ml": 1004 },
+      { "id_ml": 1005 },
+      { "id_ml": 1006, "quantity_measurement": 100 },
+      { "id_ml": 951, "quantity_measurement": 15, "quantity": 1 }
+    ]
+  },
+  {
+    "name": "Koktajl mleczno-bananowy z truskawkami",
+    "time": 5,
+    "difficulty": "easy",
+    "is_vegetarian": true,
+    "is_gluten_free": true,
+    "instruction": "Obierz banana, umyj truskawki i zblenduj wszystkie składniki z chłodnym mlekiem na gładki koktajl.",
+    "ingredients": [
+      { "id_ml": 1003, "quantity_measurement": 250 },
+      { "id_ml": 954 },
+      { "id_ml": 949 }
+    ]
+  },
+  {
+    "name": "Pieczone pałki z kurczaka z brokułem i papryką",
+    "time": 40,
+    "difficulty": "medium",
+    "is_vegetarian": false,
+    "is_gluten_free": true,
+    "instruction": "Natrzyj pałki z kurczaka masłem i sokiem z cytryny, piecz w 190°C przez 35 minut. Na ostatnie 15 minut dorzuć różyczki brokuła oraz pokrojoną paprykę.",
+    "ingredients": [
+      { "id_ml": 542, "quantity": 3 },
+      { "id_ml": 937 },
+      { "id_ml": 945 },
+      { "id_ml": 1001, "quantity_measurement": 15 },
+      { "id_ml": 951, "quantity_measurement": 15, "quantity": 1 }
+    ]
+  },
+  {
+    "name": "Duszona cukinia z pieczarkami i pomidorami",
+    "time": 20,
+    "difficulty": "easy",
+    "is_vegetarian": true,
+    "is_gluten_free": true,
+    "instruction": "Pokrój grzyby i cukinię w plastry, podsmaż na maśle przez 7 minut, dodaj pokrojone pomidory i duś do miękkości.",
+    "ingredients": [
+      { "id_ml": 939 },
+      { "id_ml": 947, "quantity": 3 },
+      { "id_ml": 1007, "quantity": 3 },
+      { "id_ml": 1001, "quantity_measurement": 15 }
+    ]
+  },
+  {
+    "name": "Grzanki z bagietki z grzybami zapiekane na maśle",
+    "time": 15,
+    "difficulty": "easy",
+    "is_vegetarian": true,
+    "is_gluten_free": false,
+    "instruction": "Pokrój bagietkę na kromki, posmaruj masłem, nałóż podsmażone grzyby z papryką i podpiecz w piekarniku przez 6 minut.",
+    "ingredients": [
+      { "id_ml": 930, "quantity": 3 },
+      { "id_ml": 947, "quantity": 3 },
+      { "id_ml": 945 },
+      { "id_ml": 1001, "quantity_measurement": 10 }
+    ]
+  },
+  {
+    "name": "Krem z kalafiora i brokuła na mleku",
+    "time": 25,
+    "difficulty": "easy",
+    "is_vegetarian": true,
+    "is_gluten_free": true,
+    "instruction": "Ugotuj różyczki kalafiora i brokuła do miękkości, dodaj masło oraz mleko i zblenduj całość na aksamitny krem.",
+    "ingredients": [
+      { "id_ml": 938 },
+      { "id_ml": 937 },
+      { "id_ml": 1003, "quantity_measurement": 200 },
+      { "id_ml": 1001, "quantity_measurement": 15 }
+    ]
+  },
+  {
+    "name": "Sałatka warzywna z ogórkiem, pomidorem, papryką i kukurydzą",
+    "time": 10,
+    "difficulty": "easy",
+    "is_vegetarian": true,
+    "is_gluten_free": true,
+    "instruction": "Pokrój ogórka, pomidora i paprykę w kostkę, dodaj kukurydzę, skrop sokiem z cytryny i wymieszaj.",
+    "ingredients": [
+      { "id_ml": 943 },
+      { "id_ml": 1007 },
+      { "id_ml": 945 },
+      { "id_ml": 987 },
+      { "id_ml": 951, "quantity_measurement": 15, "quantity": 1 }
+    ]
+  },
+  {
+    "name": "Placuszki bananowe na mleku i mące",
+    "time": 15,
+    "difficulty": "easy",
+    "is_vegetarian": true,
+    "is_gluten_free": false,
+    "instruction": "Rozgnieć dojrzałego banana widelcem, wymieszaj z mlekiem i mąką na gęste ciasto, a następnie smaż małe placuszki na maśle.",
+    "ingredients": [
+      { "id_ml": 954 },
+      { "id_ml": 1002, "quantity_measurement": 80 },
+      { "id_ml": 1003, "quantity_measurement": 200 },
+      { "id_ml": 1001, "quantity_measurement": 10 }
+    ]
+  },
+  {
+    "name": "Egzotyczna sałatka z ananasem, pomarańczą i granatem",
+    "time": 10,
+    "difficulty": "easy",
+    "is_vegetarian": true,
+    "is_gluten_free": true,
+    "instruction": "Obierz pomarańczę i ananasa, pokrój na mniejsze kawałki, posyp pestkami granatu i dokładnie wymieszaj.",
+    "ingredients": [
+      { "id_ml": 953 },
+      { "id_ml": 950 },
+      { "id_ml": 957 }
+    ]
+  }
+]

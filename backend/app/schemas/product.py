@@ -2,8 +2,10 @@ from enum import Enum
 
 from pydantic import BaseModel, Field
 
-from app.schemas import FilterOperator, SortOrder
+from app.db.models.product_db import MeasurementType
+from app.schemas.filter import NumberFilter
 from app.schemas.ingredients import Ingredients
+from app.schemas.sort import SortOrder
 
 
 class Recognition(BaseModel):
@@ -25,6 +27,7 @@ class RecognizeProductResponse(BaseModel):
 class Product(BaseModel):
     id_ml: int
     name: str
+    measurement_type: MeasurementType = MeasurementType.WEIGHT
     ingredients: Ingredients
 
 
@@ -44,11 +47,6 @@ class ProductSortField(str, Enum):
 class ProductSort(BaseModel):
     field: ProductSortField
     order: SortOrder = SortOrder.ASC
-
-
-class NumberFilter(BaseModel):
-    operator: FilterOperator
-    value: float
 
 
 class ProductFilters(BaseModel):

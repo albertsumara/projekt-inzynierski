@@ -11,55 +11,61 @@ from app.schemas.product import (
     RecognizeProductResponse,
 )
 from app.services.image_service import ImageService
+from app.services.interfaces.product_service_interface import (
+    ProductServiceInterface,
+)
 from app.services.product_service import ProductService
 
-product_router = APIRouter()
 
-image_service = ImageService()
-product_service = ProductService(image_service=image_service)
+class ProductRouter:
+    def __init__(self, service: ProductServiceInterface | None = None):
+        self.service = (
+            service if service is not None else ProductService(ImageService())
+        )
 
+        self.router = APIRouter()
 
-@product_router.post(
-    "/product/recognize",
-    response_model=RecognizeProductResponse,
-    status_code=status.HTTP_200_OK,
-)
-async def recognize(
-    db: Annotated[
-        Session,
-        Depends(get_db),
-    ],
-    file: UploadFile = File(...),
-):
-    return await product_service.recognize_product(file, db)
+        self.router.post(
+            "/product/recognize",
+            response_model=RecognizeProductResponse,
+            status_code=status.HTTP_200_OK,
+        )(self.recognize)
 
+        self.router.post("/product")(self.add_product)
+        self.router.get("/product/{product_id}")(self.get_product)
+        self.router.post("/products")(self.list_products)
 
-@product_router.post("/product")
-def add_product(
-    product: AddProductRequest,
-    db: Annotated[
-        Session,
-        Depends(get_db),
-    ],
-):
-    return ProductService.add_product(product, db)
+    async def recognize(
+        self,
+        db: Annotated[Session, Depends(get_db)],
+        file: UploadFile = File(...),
+    ):
+        return await self.service.recognize_product(file, db)
 
+    def add_product(
+        self,
+        product: AddProductRequest,
+        db: Annotated[Session, Depends(get_db)],
+    ):
+        return self.service.add_product(product, db)
 
-@product_router.get("/product/{product_id}")
-def get_product(
-    product_id: int,
-    db: Annotated[
-        Session,
-        Depends(get_db),
-    ],
-):
-    params = ListProductsRequest(filters=ProductFilters(id=product_id))
-    return ProductService.list_products(params, db)
+    def get_product(
+        self,
+        product_id: int,
+        db: Annotated[Session, Depends(get_db)],
+    ):
+        params = ListProductsRequest(filters=ProductFilters(id=product_id))
+        return self.service.list_products(params, db)
 
+    def list_products(
+        self,
+        params: ListProductsRequest | None = None,
+        db: Annotated[Session, Depends(get_db)] = None,
+    ):
+        if params is None:
+            params = ListProductsRequest()
 
-@product_router.post("/products")
-def list_products(
-    params: ListProductsRequest | None = None,
-    db: Annotated[Session, Depends(get_db)] = None,
-):
-    return ProductService.list_products(params, db)
+        return self.service.list_products(params, db)
+
+    def get_router(self) -> APIRouter:
+        return self.router

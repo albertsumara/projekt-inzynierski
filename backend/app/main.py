@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from app.api.routes import product_router, user_router
+from app.api.routes import ProductRouter, RecipeRouter, UserRouter
 from app.db.database import SessionLocal, engine, get_db
 from app.db.models import Base
 from app.db.seed import seed_data
@@ -50,13 +50,19 @@ def database_health_check(db: Session = Depends(get_db)):
 
 
 app.include_router(
-    product_router,
+    ProductRouter().get_router(),
     prefix="/api/v1",
     tags=["Products"],
 )
 
 app.include_router(
-    user_router,
+    UserRouter().get_router(),
     prefix="/api/v1",
     tags=["Users"],
+)
+
+app.include_router(
+    RecipeRouter().get_router(),
+    prefix="/api/v1",
+    tags=["Recipes"],
 )
