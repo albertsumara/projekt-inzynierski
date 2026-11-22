@@ -18,9 +18,13 @@ class UserServiceInterface(ABC):
         pass
 
     @abstractmethod
-    def add_product_to_user(
+    def add_users_product(
         self,
         request: AddProductToUserRequest,
         db: Session,
     ):
+        pass
+
+    @abstractmethod
+    def remove_users_product(self, users_product_id: int, db: Session):
         pass

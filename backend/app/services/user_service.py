@@ -143,9 +143,9 @@ class UserService(UserServiceInterface):
         return UserMapper.to_list_users_products_response(query.all())
 
     @staticmethod
-    def add_product_to_user(request: AddProductToUserRequest, db: Session):
+    def add_users_product(request: AddProductToUserRequest, db: Session):
 
-        new_product_to_user = UserMapper.to_add_product_to_user(request)
+        new_product_to_user = UserMapper.to_add_users_product(request)
         try:
             db.add(new_product_to_user)
             db.commit()
@@ -162,3 +162,16 @@ class UserService(UserServiceInterface):
                 {"users_products_product_id_fkey": ProductNotFoundError},
             )
             raise UserDbError("Database error.") from e
+
+    @staticmethod
+    def remove_users_product(users_product_id: int, db: Session):
+        users_product = (
+            db.query(UsersProductsDb)
+            .filter(UsersProductsDb.id == users_product_id)
+            .first()
+        )
+        if users_product is None:
+            raise UserNotFoundError("User product not found.")
+
+        db.delete(users_product)
+        db.commit()

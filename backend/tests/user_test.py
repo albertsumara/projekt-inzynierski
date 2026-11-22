@@ -77,3 +77,11 @@ def test_add_product_returns_not_found_when_user_does_not_exist():
 
     assert response.status_code == 404
     assert response.json()["detail"] == "User not found."
+
+
+def test_remove_user_product_endpoint(user_client, user_service):
+    response = user_client.delete("/api/v1/users/product/9")
+
+    assert response.status_code == 204
+    assert len(user_service.remove_calls) == 1
+    assert user_service.remove_calls[0][0] == 9

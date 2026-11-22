@@ -18,20 +18,24 @@ class UserRouter:
         self.service = service if service is not None else UserService()
         self.router = APIRouter()
 
-        self.router.post("/user/product", status_code=201)(self.add_product)
+        self.router.post("/user/product", status_code=201)(self.add_users_product)
         self.router.post(
             "/user/products",
             response_model=ListUsersProductsResponse,
-        )(self.list_products)
+        )(self.list_users_products)
+        self.router.delete(
+            "/user/product/{users_product_id}",
+            status_code=204,
+        )(self.remove_users_product)
 
-    def add_product(
+    def add_users_product(
         self,
         request: AddProductToUserRequest,
         db: Annotated[Session, Depends(get_db)],
     ):
-        return self.service.add_product_to_user(request, db)
+        return self.service.add_users_product(request, db)
 
-    def list_products(
+    def list_users_products(
         self,
         params: ListUsersProductsRequest | None = None,
         db: Annotated[Session, Depends(get_db)] = None,
@@ -40,6 +44,13 @@ class UserRouter:
             params = ListUsersProductsRequest()
 
         return self.service.list_users_products(params, db)
+
+    def remove_users_product(
+        self,
+        users_product_id: int,
+        db: Annotated[Session, Depends(get_db)],
+    ):
+        return self.service.remove_users_product(users_product_id, db)
 
     def get_router(self) -> APIRouter:
         return self.router
