@@ -10,6 +10,8 @@ from app.db.models.ingredients_db import IngredientsDb
 from app.db.models.product_db import ProductDb
 from app.db.models.recipe_db import (
     RecipeDb,
+)
+from app.db.models.recipe_db import (
     RecipeDifficulty as DbRecipeDifficulty,
 )
 from app.db.models.recipes_products_db import RecipesProductsDb
@@ -70,9 +72,7 @@ def list_recipes(db: Session, params: ListRecipesRequest) -> list[Row[Any]]:
             query = query.filter(RecipeDb.id == filters.id)
 
         if filters.name is not None:
-            query = query.filter(
-                RecipeDb.name.icontains(filters.name, autoescape=True)
-            )
+            query = query.filter(RecipeDb.name.icontains(filters.name, autoescape=True))
 
         if filters.time is not None:
             query = apply_number_filter(query, RecipeDb.time, filters.time)
@@ -104,22 +104,15 @@ def list_recipes(db: Session, params: ListRecipesRequest) -> list[Row[Any]]:
         if filters.difficulty:
             query = query.filter(
                 RecipeDb.difficulty.in_(
-                    [
-                        to_db_difficulty(difficulty)
-                        for difficulty in filters.difficulty
-                    ]
+                    [to_db_difficulty(difficulty) for difficulty in filters.difficulty]
                 )
             )
 
         if filters.is_vegetarian is not None:
-            query = query.filter(
-                RecipeDb.is_vegetarian == filters.is_vegetarian
-            )
+            query = query.filter(RecipeDb.is_vegetarian == filters.is_vegetarian)
 
         if filters.is_gluten_free is not None:
-            query = query.filter(
-                RecipeDb.is_gluten_free == filters.is_gluten_free
-            )
+            query = query.filter(RecipeDb.is_gluten_free == filters.is_gluten_free)
 
         if filters.product_ids:
             products_query = db.query(RecipesProductsDb.recipe_id).filter(
@@ -192,15 +185,11 @@ def get_recipe_stats(db: Session) -> Subquery:
 
     return (
         db.query(
-            RecipesProductsDb.recipe_id.label(
-                RecipeAggregateField.RECIPE_ID.value
-            ),
+            RecipesProductsDb.recipe_id.label(RecipeAggregateField.RECIPE_ID.value),
             func.count(func.distinct(RecipesProductsDb.product_id)).label(
                 RecipeAggregateField.PRODUCTS_COUNT.value
             ),
-            func.sum(ingredient_weight).label(
-                RecipeAggregateField.TOTAL_WEIGHT.value
-            ),
+            func.sum(ingredient_weight).label(RecipeAggregateField.TOTAL_WEIGHT.value),
             *nutrient_totals,
         )
         .join(ProductDb, ProductDb.id == RecipesProductsDb.product_id)

@@ -34,11 +34,8 @@ class UserRouter:
     def list_products(
         self,
         db: Annotated[Session, Depends(get_db)],
-        params: ListUsersProductsRequest | None = None,
+        params: ListUsersProductsRequest,
     ):
-        if params is None:
-            params = ListUsersProductsRequest()
-
         return self.service.list_users_products(params, db)
 
     def get_router(self) -> APIRouter:

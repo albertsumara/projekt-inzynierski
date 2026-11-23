@@ -1,6 +1,6 @@
 import pytest
-
 from app.db.models.product_db import ProductDb
+
 from tests.helpers import add_product_payload, create_image_bytes
 
 pytestmark = pytest.mark.integration
@@ -46,18 +46,16 @@ def test_add_product_persists_product_and_ingredients(api_client, db_session):
     assert created_product["ingredients"]["calories"] == 89
 
     persisted_product = (
-        db_session.query(ProductDb)
-        .filter(ProductDb.id == created_product["id"])
-        .one()
+        db_session.query(ProductDb).filter(ProductDb.id == created_product["id"]).one()
     )
     assert persisted_product.ingredients.calories == 89
 
     read_response = api_client.get(f"/api/v1/product/{created_product['id']}")
 
     assert read_response.status_code == 200
-    assert [
-        product["name"] for product in read_response.json()["products"]
-    ] == ["Banana"]
+    assert [product["name"] for product in read_response.json()["products"]] == [
+        "Banana"
+    ]
     assert read_response.json()["products"][0]["ingredients"]["calories"] == 89
 
 

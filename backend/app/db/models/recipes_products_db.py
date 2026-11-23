@@ -20,7 +20,9 @@ class RecipesProductsDb(Base):
         ForeignKey("products.id"),
         nullable=False,
     )
-    quantity_measurement: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
+    quantity_measurement: Mapped[Decimal] = mapped_column(
+        Numeric(10, 2), nullable=False
+    )
     quantity: Mapped[int] = mapped_column(
         Integer, nullable=False, default=1, server_default="1"
     )

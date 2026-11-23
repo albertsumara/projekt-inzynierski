@@ -1,17 +1,14 @@
 import io
 
-from models.image_classifier import ImageClassifier
-from PIL import Image
-
 from app.db.models.product_db import MeasurementType
 from app.schemas.ingredients import Ingredients
 from app.schemas.product import AddProductRequest, Product
+from models.image_classifier import ImageClassifier
+from PIL import Image
 
 
 class DeterministicImageClassifier(ImageClassifier):
-    def recognize(
-        self, image: Image.Image
-    ) -> list[dict[str, int | float]]:
+    def recognize(self, image: Image.Image) -> list[dict[str, int | float]]:
         return [{"id_ml": 7, "confidence": 0.95}]
 
 

@@ -67,9 +67,7 @@ def list_users_products(
         )
         * total_measurement
         / 100,
-        UsersProductAggregateField.CARBS.value: func.coalesce(
-            IngredientsDb.carbs, 0
-        )
+        UsersProductAggregateField.CARBS.value: func.coalesce(IngredientsDb.carbs, 0)
         * total_measurement
         / 100,
         UsersProductAggregateField.FAT.value: func.coalesce(IngredientsDb.fat, 0)
@@ -85,16 +83,15 @@ def list_users_products(
             quantity_measurement.label(
                 UsersProductAggregateField.QUANTITY_MEASUREMENT.value
             ),
-            total_measurement.label(
-                UsersProductAggregateField.TOTAL_MEASUREMENT.value
-            ),
+            total_measurement.label(UsersProductAggregateField.TOTAL_MEASUREMENT.value),
             *(column.label(field) for field, column in nutrition_columns.items()),
         )
         .join(ProductDb, ProductDb.id == UsersProductsDb.product_id)
         .outerjoin(IngredientsDb, IngredientsDb.product_id == ProductDb.id)
+        .filter(UsersProductsDb.user_id == params.user_id)
     )
 
-    if params and params.filters:
+    if params.filters:
         filters = params.filters
 
         if filters.id is not None:
@@ -120,7 +117,7 @@ def list_users_products(
             if number_filter is not None:
                 query = apply_number_filter(query, column, number_filter)
 
-    if params and params.sort:
+    if params.sort:
         sort_columns = {
             UsersProductsSortField.SHELF_LIFE_LEFT: shelf_life_left,
             UsersProductsSortField.CREATED_AT: UsersProductsDb.created_at,

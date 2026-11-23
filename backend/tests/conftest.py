@@ -1,15 +1,10 @@
 import os
+import shutil
 import subprocess
 import uuid
+from enum import Enum
 
 import pytest
-from dotenv import load_dotenv
-from fastapi import FastAPI
-from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
-from sqlalchemy.engine import URL
-from sqlalchemy.orm import Session, sessionmaker
-
 from app.api.routes.product_router import ProductRouter
 from app.api.routes.recipe_router import RecipeRouter
 from app.api.routes.user_router import UserRouter
@@ -19,35 +14,46 @@ from app.db.models.ingredients_db import IngredientsDb
 from app.db.models.product_db import MeasurementType, ProductDb
 from app.db.models.recipe_db import (
     RecipeDb,
+)
+from app.db.models.recipe_db import (
     RecipeDifficulty as DbRecipeDifficulty,
 )
 from app.db.models.recipes_products_db import RecipesProductsDb
 from app.db.models.user_db import UserDb
 from app.services.image_service import ImageService
 from app.services.product_service import ProductService
-from paths import ENV_TEST_CONFIGURATION_PATH
+from dotenv import load_dotenv
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
+from paths import BASE_DIR, DOCKER_COMPOSE_TEST_PATH, ENV_TEST_CONFIGURATION_PATH
+from sqlalchemy import create_engine
+from sqlalchemy.engine import URL
+from sqlalchemy.orm import Session, sessionmaker
+
 from tests.helpers import DeterministicImageClassifier
+
+
+class TestDatabaseSetting(str, Enum):
+    HOST = "TEST_DB_HOST"
+    PORT = "TEST_DB_PORT"
+    NAME = "TEST_DB_NAME"
+    USER = "TEST_DB_USER"
+    PASSWORD = "TEST_DB_PASSWORD"
 
 
 @pytest.fixture(scope="session")
 def integration_engine():
     env_file = ENV_TEST_CONFIGURATION_PATH
-    backend_dir = env_file.parent
-    compose_file = backend_dir / "docker-compose.test.yml"
+    compose_file = DOCKER_COMPOSE_TEST_PATH
     if not env_file.is_file():
         pytest.fail(f"Test environment file not found: {env_file}")
     load_dotenv(env_file, override=True)
 
-    required_settings = (
-        "TEST_DB_HOST",
-        "TEST_DB_PORT",
-        "TEST_DB_NAME",
-        "TEST_DB_USER",
-        "TEST_DB_PASSWORD",
-    )
-    settings = {key: os.getenv(key) for key in required_settings}
+    database_settings = {
+        setting: os.getenv(setting.value) for setting in TestDatabaseSetting
+    }
     missing_settings = [
-        key for key in required_settings if not settings.get(key)
+        setting.value for setting, value in database_settings.items() if not value
     ]
     if missing_settings:
         pytest.fail(
@@ -55,28 +61,34 @@ def integration_engine():
             f"{', '.join(missing_settings)}"
         )
 
-    database_host = settings["TEST_DB_HOST"]
-    database_name = settings["TEST_DB_NAME"]
-    if (
-        database_host not in {"localhost", "127.0.0.1", "::1"}
-        or not database_name.endswith("_test")
-    ):
+    database_host = database_settings[TestDatabaseSetting.HOST]
+    database_name = database_settings[TestDatabaseSetting.NAME]
+    if database_host not in {
+        "localhost",
+        "127.0.0.1",
+        "::1",
+    } or not (database_name and database_name.endswith("_test")):
         pytest.fail(
             "The test database must use a local host and a database name "
             "ending in '_test'."
         )
     try:
-        database_port = int(settings["TEST_DB_PORT"])
+        database_port = int(database_settings[TestDatabaseSetting.PORT] or "")
     except ValueError:
-        pytest.fail("TEST_DB_PORT in .env.test must be an integer.")
+        pytest.fail(f"{TestDatabaseSetting.PORT} in .env.test must be an integer.")
     if not 1 <= database_port <= 65535:
-        pytest.fail("TEST_DB_PORT in .env.test must be between 1 and 65535.")
+        pytest.fail(
+            f"{TestDatabaseSetting.PORT} in .env.test must be between 1 and 65535."
+        )
 
     project_name = f"projekt-tests-{uuid.uuid4().hex[:8]}"
-    compose_environment = os.environ.copy()
-    compose_environment.update(
-        {key: value for key, value in settings.items() if value is not None}
-    )
+    if shutil.which("docker") is None:
+        pytest.fail(
+            "Docker CLI was not found on PATH. Install Docker Desktop or add "
+            "the directory containing docker.exe to PATH.",
+            pytrace=False,
+        )
+
     compose_command = [
         "docker",
         "compose",
@@ -91,8 +103,8 @@ def integration_engine():
     def run_compose(*arguments):
         return subprocess.run(
             compose_command + list(arguments),
-            cwd=backend_dir,
-            env=compose_environment,
+            cwd=BASE_DIR,
+            stdin=subprocess.DEVNULL,
             capture_output=True,
             text=True,
             check=False,
@@ -109,8 +121,8 @@ def integration_engine():
 
     database_url = URL.create(
         "postgresql+psycopg",
-        username=settings["TEST_DB_USER"],
-        password=settings["TEST_DB_PASSWORD"],
+        username=database_settings[TestDatabaseSetting.USER],
+        password=database_settings[TestDatabaseSetting.PASSWORD],
         host=database_host,
         port=database_port,
         database=database_name,

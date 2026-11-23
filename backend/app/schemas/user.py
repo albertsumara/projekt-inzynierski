@@ -62,6 +62,7 @@ class UsersProduct(BaseModel):
 
 
 class ListUsersProductsRequest(BaseModel):
+    user_id: int
     filters: UsersProductsFilters | None = None
     sort: UsersProductSort | None = None
 
