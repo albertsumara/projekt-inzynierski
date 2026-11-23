@@ -1,21 +1,22 @@
 from fastapi import HTTPException, UploadFile, status
-from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError as SQLAlchemyIntegrityError
 from sqlalchemy.orm import Session
 
-from app.db.models.ingredients_db import IngredientsDb
-from app.db.models.product_db import ProductDb
+from app.db.queries.product_queries import (
+    get_product_by_ml,
+    get_products_by_ml_ids,
+    list_products as query_products,
+)
 from app.errors.image_errors import ImageError
 from app.errors.product_errors import (
     ProductDbError,
     ProductNameAlreadyExistsError,
 )
 from app.mappers import ProductMapper
-from app.schemas import SortOrder
 from app.schemas.product import (
+    ListProductsResponse,
     ListProductsRequest,
-    ProductFilters,
-    ProductSortField,
+    ProductResponse,
     Recognition,
     RecognizeProductResponse,
 )
@@ -25,7 +26,6 @@ from app.services.interfaces.product_service_interface import (
     ProductServiceInterface,
 )
 from app.utils.database import raise_for_constraint
-from app.utils.filters import apply_number_filter
 
 
 class ProductService(ProductServiceInterface):
@@ -54,15 +54,15 @@ class ProductService(ProductServiceInterface):
             await file.close()
 
     @staticmethod
-    def add_product(product, db: Session):
+    def add_product(product, db: Session) -> ProductResponse:
 
-        new_product = ProductMapper.to_product(product)
+        new_product = ProductMapper.to_product_db(product)
 
         try:
             db.add(new_product)
             db.commit()
             db.refresh(new_product)
-            return new_product
+            return ProductMapper.to_product_response(new_product)
         except SQLAlchemyIntegrityError as e:
             db.rollback()
 
@@ -74,18 +74,15 @@ class ProductService(ProductServiceInterface):
 
     @staticmethod
     def get_product_by_id_ml(id_ml: int, db: Session):
-        query = select(ProductDb).where(ProductDb.id_ml == id_ml)
-        return db.execute(query).scalar_one_or_none()
+        return get_product_by_ml(db, id_ml)
 
     @staticmethod
     def _get_recognized_products(
-        recognitions: Recognition,
+        recognitions: list[Recognition],
         db: Session,
     ):
         ids_ml = [r.id_ml for r in recognitions]
-
-        query = select(ProductDb).where(ProductDb.id_ml.in_(ids_ml))
-        products = db.execute(query).scalars().all()
+        products = get_products_by_ml_ids(db, ids_ml)
         products_map = {p.id_ml: p for p in products}
 
         return [
@@ -98,47 +95,9 @@ class ProductService(ProductServiceInterface):
         ]
 
     @staticmethod
-    def list_products(params: ListProductsRequest, db: Session):
-        query = db.query(ProductDb).join(ProductDb.ingredients)
-
-        if params and params.filters:
-            filters = params.filters
-
-            if filters.id is not None:
-                query = query.filter(ProductDb.id == filters.id)
-
-            if filters.id_ml is not None:
-                query = query.filter(ProductDb.id_ml == filters.id_ml)
-
-            filter_columns = {
-                field: getattr(IngredientsDb, field)
-                for field in ProductFilters.model_fields
-                if field not in ("id", "id_ml")
-            }
-
-            for field, column in filter_columns.items():
-                number_filter = getattr(filters, field)
-
-                if number_filter is None:
-                    continue
-
-                query = apply_number_filter(query, column, number_filter)
-
-        if params and params.sort:
-            sort_columns = {
-                ProductSortField.NAME: ProductDb.name,
-                ProductSortField.CALORIES: IngredientsDb.calories,
-                ProductSortField.PROTEIN: IngredientsDb.protein,
-                ProductSortField.CARBS: IngredientsDb.carbs,
-                ProductSortField.FAT: IngredientsDb.fat,
-                ProductSortField.SHELF_LIFE: IngredientsDb.shelf_life,
-            }
-
-            column = sort_columns[params.sort.field]
-
-            if params.sort.order == SortOrder.ASC:
-                query = query.order_by(column.asc())
-            else:
-                query = query.order_by(column.desc())
-
-        return query.all()
+    def list_products(
+        params: ListProductsRequest,
+        db: Session,
+    ) -> ListProductsResponse:
+        products = query_products(db, params)
+        return ProductMapper.to_list_products_response(products)

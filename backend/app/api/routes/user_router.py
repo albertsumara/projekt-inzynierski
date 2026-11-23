@@ -26,15 +26,15 @@ class UserRouter:
 
     def add_product(
         self,
-        request: AddProductToUserRequest,
         db: Annotated[Session, Depends(get_db)],
+        request: AddProductToUserRequest,
     ):
         return self.service.add_product_to_user(request, db)
 
     def list_products(
         self,
+        db: Annotated[Session, Depends(get_db)],
         params: ListUsersProductsRequest | None = None,
-        db: Annotated[Session, Depends(get_db)] = None,
     ):
         if params is None:
             params = ListUsersProductsRequest()

@@ -3,13 +3,13 @@ from app.schemas.user import (
     AddProductToUserRequest,
     ListUsersProductsResponse,
     UsersProduct,
-    UsersProductAggregateField,
 )
+from app.db.queries.user_queries import UsersProductAggregateField
 
 
 class UserMapper:
     @staticmethod
-    def to_create_user(data):
+    def to_create_user(data) -> UserDb:
         return UserDb(name=data.name)
 
     @staticmethod

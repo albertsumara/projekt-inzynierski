@@ -22,8 +22,8 @@ class RecipeRouter:
 
     def list_recipes(
         self,
+        db: Annotated[Session, Depends(get_db)],
         params: ListRecipesRequest | None = None,
-        db: Annotated[Session, Depends(get_db)] = None,
     ):
         if params is None:
             params = ListRecipesRequest()

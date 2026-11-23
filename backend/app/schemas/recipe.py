@@ -71,16 +71,6 @@ class RecipeSortField(str, Enum):
     TOTAL_WEIGHT = "total_weight"
 
 
-class RecipeAggregateField(str, Enum):
-    RECIPE_ID = "recipe_id"
-    PRODUCTS_COUNT = "products_count"
-    TOTAL_WEIGHT = "total_weight"
-    CALORIES = "calories"
-    PROTEIN = "protein"
-    CARBS = "carbs"
-    FAT = "fat"
-
-
 class RecipeSort(BaseModel):
     field: RecipeSortField
     order: SortOrder = SortOrder.ASC

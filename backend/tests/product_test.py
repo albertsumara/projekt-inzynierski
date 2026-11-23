@@ -1,144 +1,87 @@
 import pytest
-from fastapi import FastAPI, HTTPException, status
-from fastapi.testclient import TestClient
 
-from app.api.routes.product_router import ProductRouter
-from app.db.database import get_db
-from app.errors.image_errors import InvalidImageSizeError
-from app.services.interfaces.product_service_interface import ProductServiceInterface
-from app.services.product_service import ProductService
-from tests.mocks import (
-    MOCK_ADD_PRODUCT_REQUEST,
-    MOCK_PRODUCTS,
-    MockImageService,
-    MockProductService,
-    create_recognition_response,
-)
+from app.db.models.product_db import ProductDb
+from tests.helpers import add_product_payload, create_image_bytes
+
+pytestmark = pytest.mark.integration
 
 
-@pytest.fixture
-def product_service():
-    return MockProductService(
-        recognize_response=create_recognition_response(),
-        products=MOCK_PRODUCTS,
-    )
-
-
-@pytest.fixture
-def product_client(product_service):
-    app = FastAPI()
-    app.include_router(ProductRouter(product_service).get_router(), prefix="/api/v1")
-    app.dependency_overrides[get_db] = lambda: object()
-
-    with TestClient(app) as client:
-        yield client
-
-    app.dependency_overrides.clear()
-
-
-def test_product_mock_implements_service_interface():
-    assert isinstance(MockProductService(), ProductServiceInterface)
-
-
-def test_recognize_product_endpoint(product_client, product_service):
-    response = product_client.post(
+def test_recognize_product_endpoint_uses_classifier_and_database(
+    api_client, seeded_product
+):
+    response = api_client.post(
         "/api/v1/product/recognize",
-        files={"file": ("apple.jpg", b"image-data", "image/jpeg")},
+        files={
+            "file": (
+                "apple.jpg",
+                create_image_bytes("JPEG"),
+                "image/jpeg",
+            )
+        },
     )
 
     assert response.status_code == 200
-    assert response.json()["filename"] == "apple.jpg"
-    assert response.json()["recognitions"][0]["name"] == "Apple"
-    assert product_service.recognize_calls[0][0] == b"image-data"
-    assert product_service.recognize_calls[0][1] == "image/jpeg"
+    assert response.json() == {
+        "filename": "apple.jpg",
+        "recognitions": [
+            {
+                "id": seeded_product.id,
+                "name": "Apple",
+                "confidence": 0.95,
+            }
+        ],
+    }
 
 
-def test_add_product_endpoint(product_client, product_service):
-    response = product_client.post(
+def test_add_product_persists_product_and_ingredients(api_client, db_session):
+    create_response = api_client.post(
         "/api/v1/product",
-        json=MOCK_ADD_PRODUCT_REQUEST.model_dump(mode="json"),
+        json=add_product_payload(),
     )
+
+    assert create_response.status_code == 200
+    created_product = create_response.json()
+    assert created_product["name"] == "Banana"
+    assert created_product["id_ml"] == 12
+    assert created_product["ingredients"]["calories"] == 89
+
+    persisted_product = (
+        db_session.query(ProductDb)
+        .filter(ProductDb.id == created_product["id"])
+        .one()
+    )
+    assert persisted_product.ingredients.calories == 89
+
+    read_response = api_client.get(f"/api/v1/product/{created_product['id']}")
+
+    assert read_response.status_code == 200
+    assert [
+        product["name"] for product in read_response.json()["products"]
+    ] == ["Banana"]
+    assert read_response.json()["products"][0]["ingredients"]["calories"] == 89
+
+
+def test_get_product_filters_using_database(api_client, seeded_products):
+    response = api_client.get(f"/api/v1/product/{seeded_products.id}")
 
     assert response.status_code == 200
-    assert response.json() == {"id": 1, "name": "Test product"}
-    assert len(product_service.add_calls) == 1
-    assert product_service.add_calls[0][0].product.name == "Banana"
+    products = response.json()["products"]
+    assert [product["name"] for product in products] == ["Apple"]
+    assert products[0]["id"] == seeded_products.id
 
 
-def test_get_product_endpoint_filters_by_product_id(product_client, product_service):
-    response = product_client.get("/api/v1/product/5")
-
-    assert response.status_code == 200
-    assert response.json() == [{"id": 1, "name": "Apple"}]
-    assert product_service.list_calls[0][0].filters.id == 5
-
-
-def test_list_products_endpoint(product_client, product_service):
-    response = product_client.post("/api/v1/products", json={})
+def test_get_missing_product_returns_empty_list(api_client, seeded_product):
+    response = api_client.get(f"/api/v1/product/{seeded_product.id + 1000}")
 
     assert response.status_code == 200
-    assert response.json() == [{"id": 1, "name": "Apple"}]
-    assert len(product_service.list_calls) == 1
+    assert response.json() == {"products": []}
 
 
-def test_add_product_returns_conflict_when_product_already_exists():
-    service = MockProductService(
-        add_error=HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Product already exists.",
-        )
+def test_invalid_image_returns_bad_request(api_client):
+    response = api_client.post(
+        "/api/v1/product/recognize",
+        files={"file": ("empty.jpg", b"", "image/jpeg")},
     )
-    app = FastAPI()
-    app.include_router(ProductRouter(service).get_router(), prefix="/api/v1")
-    app.dependency_overrides[get_db] = lambda: object()
-
-    with TestClient(app) as client:
-        response = client.post(
-            "/api/v1/product",
-            json=MOCK_ADD_PRODUCT_REQUEST.model_dump(mode="json"),
-        )
-
-    assert response.status_code == 409
-    assert response.json()["detail"] == "Product already exists."
-
-
-def test_get_missing_product_returns_not_found():
-    service = MockProductService(
-        list_error=HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Product not found.",
-        )
-    )
-    app = FastAPI()
-    app.include_router(ProductRouter(service).get_router(), prefix="/api/v1")
-    app.dependency_overrides[get_db] = lambda: object()
-
-    with TestClient(app) as client:
-        response = client.get("/api/v1/product/999")
-
-    assert response.status_code == 404
-    assert response.json()["detail"] == "Product not found."
-
-
-def test_recognize_endpoint_returns_400_for_image_custom_error():
-    image_service = MockImageService(
-        recognize_error=InvalidImageSizeError(
-            "The image file cannot be larger than 8 MB."
-        )
-    )
-    app = FastAPI()
-    app.include_router(
-        ProductRouter(ProductService(image_service)).get_router(),
-        prefix="/api/v1",
-    )
-    app.dependency_overrides[get_db] = lambda: object()
-
-    with TestClient(app) as client:
-        response = client.post(
-            "/api/v1/product/recognize",
-            files={"file": ("large.jpg", b"image-data", "image/jpeg")},
-        )
 
     assert response.status_code == 400
-    assert "8 MB" in response.json()["detail"]
-
+    assert response.json()["detail"] == "The image file is empty."

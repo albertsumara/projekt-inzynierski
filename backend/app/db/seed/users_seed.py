@@ -3,9 +3,12 @@ import json
 from paths import USERS_PRODUCTS_SEED_PATH, USERS_SEED_PATH
 from sqlalchemy.orm import Session
 
-from app.db.models.product_db import ProductDb
 from app.db.models.user_db import UserDb
 from app.db.models.users_products_db import UsersProductsDb
+from app.db.queries.product_queries import (
+    get_product_by_ml,
+    get_product_ml_ids,
+)
 from app.mappers.user_mapper import UserMapper
 from app.schemas.user import User, UsersProductSeed
 
@@ -48,7 +51,7 @@ def _seed_users_products(db: Session) -> None:
     users_by_name = {
         name: user_id for name, user_id in db.query(UserDb.name, UserDb.id).all()
     }
-    existing_ids_ml = {id_ml for (id_ml,) in db.query(ProductDb.id_ml).all()}
+    existing_ids_ml = get_product_ml_ids(db)
 
     for product_data in users_products_data:
         seed = UsersProductSeed.model_validate(product_data)
@@ -59,7 +62,9 @@ def _seed_users_products(db: Session) -> None:
         if seed.id_ml not in existing_ids_ml:
             raise ValueError(f"Seed product id_ml={seed.id_ml} does not exist")
 
-        product = db.query(ProductDb).filter(ProductDb.id_ml == seed.id_ml).one()
+        product = get_product_by_ml(db, seed.id_ml)
+        if product is None:
+            raise ValueError(f"Seed product id_ml={seed.id_ml} does not exist")
         user_id = users_by_name[seed.user_name]
 
         already_seeded = (

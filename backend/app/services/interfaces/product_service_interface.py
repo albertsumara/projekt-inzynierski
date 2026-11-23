@@ -2,7 +2,9 @@ from abc import ABC, abstractmethod
 
 from app.schemas.product import (
     AddProductRequest,
+    ListProductsResponse,
     ListProductsRequest,
+    ProductResponse,
     RecognizeProductResponse,
 )
 from fastapi import UploadFile
@@ -23,7 +25,7 @@ class ProductServiceInterface(ABC):
         self,
         product: AddProductRequest,
         db: Session,
-    ):
+    ) -> ProductResponse:
         pass
 
     @abstractmethod
@@ -39,5 +41,5 @@ class ProductServiceInterface(ABC):
         self,
         params: ListProductsRequest,
         db: Session,
-    ):
+    ) -> ListProductsResponse:
         pass

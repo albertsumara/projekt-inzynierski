@@ -3,14 +3,16 @@ from typing import Any
 
 from sqlalchemy.engine import Row
 
+from app.db.queries.recipe_queries import (
+    RecipeAggregateField,
+    to_db_difficulty,
+)
 from app.db.models.product_db import MeasurementType, ProductDb
 from app.db.models.recipe_db import RecipeDb
-from app.db.models.recipe_db import RecipeDifficulty as RecipeDbDifficulty
 from app.db.models.recipes_products_db import RecipesProductsDb
 from app.schemas.recipe import (
     ListRecipesResponse,
     Recipe,
-    RecipeAggregateField,
     RecipeDifficulty,
     RecipeNutrition,
     RecipeResponse,
@@ -42,7 +44,7 @@ class RecipeMapper:
         return RecipesProduct(
             product_id=data.product_id,
             product_name=data.product.name,
-            quantity_measurement=data.quantity_measurement,
+            quantity_measurement=float(data.quantity_measurement),
             quantity=data.quantity,
             measurement=RecipeMapper.to_measurement_unit(data.product),
         )
@@ -63,7 +65,7 @@ class RecipeMapper:
         return RecipeDb(
             name=data.name,
             time=data.time,
-            difficulty=RecipeMapper.to_db_difficulty(data.difficulty),
+            difficulty=to_db_difficulty(data.difficulty),
             is_vegetarian=data.is_vegetarian,
             is_gluten_free=data.is_gluten_free,
             instruction=data.instruction,
@@ -82,10 +84,6 @@ class RecipeMapper:
     ) -> RecipesProductsDb:
         quantity_measurement = data.quantity_measurement
         if quantity_measurement is None:
-            if product.ingredients is None:
-                raise ValueError(
-                    f"Product {product.id_ml} has no average size for recipe seeding"
-                )
             quantity_measurement = product.ingredients.average_size
 
         return RecipesProductsDb(
@@ -95,16 +93,12 @@ class RecipeMapper:
         )
 
     @staticmethod
-    def to_db_difficulty(data: RecipeDifficulty) -> RecipeDbDifficulty:
-        return RecipeDbDifficulty[data.name]
-
-    @staticmethod
     def to_recipe_nutrition(data: Row[Any]) -> RecipeNutrition:
         return RecipeNutrition(
-            calories=round(data._mapping[RecipeAggregateField.CALORIES.value], 2),
-            protein=round(data._mapping[RecipeAggregateField.PROTEIN.value], 2),
-            carbs=round(data._mapping[RecipeAggregateField.CARBS.value], 2),
-            fat=round(data._mapping[RecipeAggregateField.FAT.value], 2),
+            calories=round(getattr(data, RecipeAggregateField.CALORIES.value), 2),
+            protein=round(getattr(data, RecipeAggregateField.PROTEIN.value), 2),
+            carbs=round(getattr(data, RecipeAggregateField.CARBS.value), 2),
+            fat=round(getattr(data, RecipeAggregateField.FAT.value), 2),
         )
 
     @staticmethod

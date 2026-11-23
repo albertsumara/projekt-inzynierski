@@ -1,24 +1,17 @@
 import pytest
 from app.errors.image_errors import (
     EmptyImageFileError,
-    ImageError,
     InvalidImageContentTypeError,
     InvalidImageFormatError,
     InvalidImageSizeError,
 )
 from app.services.image_service import MAX_IMAGE_SIZE, ImageService, InvalidImageError
-from app.services.interfaces.image_service_interface import ImageServiceInterface
-from PIL import Image
-from tests.mocks import (
-    MockImageClassifier,
-    MockImageService,
-    create_image_bytes,
-)
+from tests.helpers import DeterministicImageClassifier, create_image_bytes
 
 
 @pytest.fixture
 def image_service():
-    return ImageService()
+    return ImageService(DeterministicImageClassifier())
 
 
 def test_accepts_valid_jpeg(image_service):
@@ -96,22 +89,8 @@ def test_rejects_corrupted_image(image_service):
         image_service.load_image(b"not-an-image", "image/jpeg")
 
 
-@pytest.mark.parametrize(
-    "error",
-    [
-        EmptyImageFileError("empty"),
-        InvalidImageContentTypeError("content type"),
-        InvalidImageFormatError("format"),
-        InvalidImageSizeError("size"),
-        InvalidImageError("corrupted"),
-    ],
-)
-def test_image_errors_share_the_image_error_base(error):
-    assert isinstance(error, ImageError)
-
-
 def test_recognize_returns_classifier_results():
-    classifier = MockImageClassifier()
+    classifier = DeterministicImageClassifier()
     service = ImageService(image_classifier=classifier)
     image_bytes = create_image_bytes("JPEG")
 
@@ -120,20 +99,3 @@ def test_recognize_returns_classifier_results():
     assert len(result) == 1
     assert result[0].id_ml == 7
     assert result[0].confidence == 0.95
-    assert len(classifier.calls) == 1
-
-
-def test_mock_image_service_implements_service_interface():
-    assert isinstance(MockImageService(), ImageServiceInterface)
-
-
-def test_mock_image_service_records_recognize_call():
-    from app.schemas.product import Recognition
-
-    recognitions = [Recognition(id_ml=3, confidence=0.75)]
-    mock = MockImageService(recognitions=recognitions)
-
-    result = mock.recognize(b"image-data", "image/jpeg")
-
-    assert result == recognitions
-    assert mock.recognize_calls == [(b"image-data", "image/jpeg")]

@@ -1,9 +1,10 @@
 import json
 
 from paths import RECIPES_SEED_PATH
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session
 
-from app.db.models import ProductDb, RecipeDb
+from app.db.models import RecipeDb
+from app.db.queries.product_queries import get_products_by_ml_ids
 from app.mappers.recipe_mapper import RecipeMapper
 from app.schemas.recipe import RecipeSeed
 
@@ -21,11 +22,10 @@ def seed_recipes(db: Session) -> None:
                 continue
 
             product_ids = {ingredient.id_ml for ingredient in recipe.ingredients}
-            products = (
-                db.query(ProductDb)
-                .options(joinedload(ProductDb.ingredients))
-                .filter(ProductDb.id_ml.in_(product_ids))
-                .all()
+            products = get_products_by_ml_ids(
+                db,
+                product_ids,
+                with_ingredients=True,
             )
             products_by_id_ml = {product.id_ml: product for product in products}
             missing_product_ids = product_ids - products_by_id_ml.keys()

@@ -130,8 +130,8 @@ def train_model():
             patience=2,
             min_lr=0.00001,
         ),
-        tf.keras.callbacks.CSVLogger(LOG_DIR / "training_history.csv"),
-        tf.keras.callbacks.TensorBoard(log_dir=LOG_DIR / "tensorboard"),
+        tf.keras.callbacks.CSVLogger(str(LOG_DIR / "training_history.csv")),
+        tf.keras.callbacks.TensorBoard(log_dir=str(LOG_DIR / "tensorboard")),
     ]
 
     training_model.fit(
