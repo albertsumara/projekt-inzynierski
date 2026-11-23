@@ -31,6 +31,18 @@ class Product(BaseModel):
     ingredients: Ingredients
 
 
+class ProductResponse(BaseModel):
+    id: int
+    id_ml: int
+    name: str
+    measurement_type: MeasurementType
+    ingredients: Ingredients
+
+
+class ListProductsResponse(BaseModel):
+    products: list[ProductResponse]
+
+
 class AddProductRequest(BaseModel):
     product: Product
 

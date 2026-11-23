@@ -1,6 +1,6 @@
 from typing import Any, TypeVar
 
-from sqlalchemy.orm import Query
+from sqlalchemy.orm import InstrumentedAttribute, Query
 from sqlalchemy.sql.elements import ColumnElement
 
 from app.schemas.filter import FilterOperator, NumberFilter
@@ -10,7 +10,7 @@ QueryResult = TypeVar("QueryResult")
 
 def apply_number_filter(
     query: Query[QueryResult],
-    column: ColumnElement[Any],
+    column: ColumnElement[Any] | InstrumentedAttribute[Any],
     number_filter: NumberFilter,
 ) -> Query[QueryResult]:
     if number_filter.operator == FilterOperator.MORE:

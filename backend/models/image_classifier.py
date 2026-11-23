@@ -25,7 +25,7 @@ class ImageClassifier:
             return
 
         import tensorflow as tf
-        from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
+        from tensorflow.keras.applications.mobilenet_v2 import preprocess_input  # type: ignore[reportMissingImports]
 
         with IMAGENET_FOOD_CLASSES_PATH.open("r", encoding="utf-8") as classes_file:
             self._imagenet_food_class_ids = tuple(
@@ -43,6 +43,8 @@ class ImageClassifier:
         resized_image = image.convert("RGB").resize((224, 224))
         image_array = np.asarray(resized_image, dtype=np.float32)
         image_array = np.expand_dims(image_array, axis=0)
+        if self._preprocess_input is None:
+            raise RuntimeError("Model preprocessing has not been loaded.")
         image_array = self._preprocess_input(image_array)
         return image_array
 
@@ -76,6 +78,8 @@ class ImageClassifier:
 
         image_array = self._prepare_image(image)
 
+        if self._model is None:
+            raise RuntimeError("Model preprocessing has not been loaded.")
         imagenet_probabilities, custom_probabilities = self._model.predict(
             image_array,
             verbose=0,

@@ -25,15 +25,6 @@ REQUIRED_INGREDIENTS_FIELDS = {
     "shelf_life",
 }
 
-REQUIRED_INGREDIENTS_FIELDS = {
-    "calories",
-    "protein",
-    "carbs",
-    "fat",
-    "average_size",
-    "shelf_life",
-}
-
 
 def prepare_dataset():
 
@@ -91,71 +82,6 @@ def _training_filename(image):
     if image.suffix.lower() == ".jfif":
         return image.with_suffix(".jpg").name
     return image.name
-
-
-def _validate_data():
-    if not RAW_DIR.exists():
-        raise RawDatasetNotFoundError(f"Wrong path: {RAW_DIR}")
-
-    classes = sorted(directory for directory in RAW_DIR.iterdir() if directory.is_dir())
-
-    if not classes:
-        raise EmptyDatasetClassesError("No classes found")
-
-    validated_ingredients = {}
-
-    for class_dir in classes:
-        class_name = class_dir.name
-        ingredients_path = class_dir / "ingredients.json"
-
-        if not ingredients_path.is_file():
-            raise IngredientsFileNotFoundError(
-                f"Missing ingredients.json for class: {class_name}"
-            )
-
-        try:
-            with open(ingredients_path, "r", encoding="utf-8") as file:
-                ingredients = json.load(file)
-
-        except (json.JSONDecodeError, OSError) as error:
-            raise InvalidIngredientsFileError(
-                f"Cannot read ingredients.json for {class_name}: {error}"
-            ) from error
-
-        if not isinstance(ingredients, dict):
-            raise InvalidIngredientsFileError(
-                f"Invalid JSON structure for class: {class_name}"
-            )
-
-        missing_fields = REQUIRED_INGREDIENTS_FIELDS - ingredients.keys()
-
-        if missing_fields:
-            raise InvalidIngredientsFileError(
-                f"Missing fields in {class_name}: {missing_fields}"
-            )
-
-        for field in REQUIRED_INGREDIENTS_FIELDS:
-            value = ingredients[field]
-
-            if (
-                isinstance(value, bool)
-                or not isinstance(value, (int, float))
-                or not math.isfinite(value)
-                or value < 0
-            ):
-                raise InvalidIngredientsFileError(
-                    f"Invalid value for '{field}' in class: {class_name}"
-                )
-
-        validated_ingredients[class_name] = ingredients
-
-    return classes, validated_ingredients
-
-
-def _create_dirs():
-    RAW_DIR.mkdir(parents=True, exist_ok=True)
-    VALIDATION_DIR.mkdir(parents=True, exist_ok=True)
-    INGREDIENTS_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def _validate_data():

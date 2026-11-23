@@ -61,21 +61,8 @@ class UsersProduct(BaseModel):
     total_measurement: float
 
 
-class UsersProductAggregateField(str, Enum):
-    ID = "id"
-    PRODUCT_ID = "product_id"
-    SHELF_LIFE_LEFT = "shelf_life_left"
-    CREATED_AT = "created_at"
-    QUANTITY = "quantity"
-    QUANTITY_MEASUREMENT = "quantity_measurement"
-    TOTAL_MEASUREMENT = "total_measurement"
-    CALORIES = "calories"
-    PROTEIN = "protein"
-    CARBS = "carbs"
-    FAT = "fat"
-
-
 class ListUsersProductsRequest(BaseModel):
+    user_id: int
     filters: UsersProductsFilters | None = None
     sort: UsersProductSort | None = None
 

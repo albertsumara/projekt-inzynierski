@@ -10,8 +10,8 @@ from paths import (
 )
 from sqlalchemy.orm import Session
 
-from app.db.models import ProductDb
 from app.db.models.product_db import MeasurementType
+from app.db.queries.product_queries import get_product_ml_ids
 from app.mappers.product_mapper import ProductMapper
 from app.schemas.product import AddProductRequest
 
@@ -55,7 +55,7 @@ def _seed_from_json(
     with ingredients_path.open("r", encoding="utf-8") as file:
         ingredients_data = json.load(file)
 
-    existing_ids = {id_ml for (id_ml,) in db.query(ProductDb.id_ml).all()}
+    existing_ids = get_product_ml_ids(db)
 
     for id_ml, name in classes_data.items():
         if int(id_ml) in existing_ids:
@@ -77,5 +77,5 @@ def _seed_from_json(
             }
         }
         product_schema = AddProductRequest.model_validate(product_data)
-        db.add(ProductMapper.to_product(product_schema))
+        db.add(ProductMapper.to_product_db(product_schema))
         existing_ids.add(int(id_ml))
