@@ -1,0 +1,20 @@
+services:
+  db-test:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: ${TEST_DB_USER:?Set TEST_DB_USER in .env.test}
+      POSTGRES_PASSWORD: ${TEST_DB_PASSWORD:?Set TEST_DB_PASSWORD in .env.test}
+      POSTGRES_DB: ${TEST_DB_NAME:?Set TEST_DB_NAME in .env.test}
+    ports:
+      - "${TEST_DB_HOST:?Set TEST_DB_HOST in .env.test}:${TEST_DB_PORT:?Set TEST_DB_PORT in .env.test}:5432"
+    tmpfs:
+      - /var/lib/postgresql
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${TEST_DB_USER} -d ${TEST_DB_NAME}",
+        ]
+      interval: 2s
+      timeout: 5s
+      retries: 15

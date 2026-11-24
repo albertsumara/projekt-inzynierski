@@ -1,8 +1,7 @@
 from abc import ABC, abstractmethod
 
-from PIL import Image
-
 from app.schemas.product import Recognition
+from PIL import Image
 
 
 class ImageServiceInterface(ABC):

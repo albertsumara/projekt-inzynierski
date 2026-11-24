@@ -1,8 +1,7 @@
 from abc import ABC, abstractmethod
 
-from sqlalchemy.orm import Session
-
 from app.schemas.recipe import ListRecipesRequest, ListRecipesResponse
+from sqlalchemy.orm import Session
 
 
 class RecipeServiceInterface(ABC):

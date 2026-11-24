@@ -4,6 +4,8 @@ BASE_DIR = Path(__file__).resolve().parent
 
 MACHINE_LEARNING_DIR = BASE_DIR / "machine_learning"
 ENV_CONFIGURATION_PATH = BASE_DIR / ".env"
+ENV_TEST_CONFIGURATION_PATH = BASE_DIR / ".env.test"
+DOCKER_COMPOSE_TEST_PATH = BASE_DIR / "docker-compose.test.yml"
 OUTPUT_DIR = BASE_DIR / "trained"
 
 DATA_DIR = BASE_DIR / "data"

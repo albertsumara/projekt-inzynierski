@@ -6,8 +6,10 @@ from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.schemas.product import (
     AddProductRequest,
+    ListProductsResponse,
     ListProductsRequest,
     ProductFilters,
+    ProductResponse,
     RecognizeProductResponse,
 )
 from app.services.image_service import ImageService
@@ -31,9 +33,14 @@ class ProductRouter:
             status_code=status.HTTP_200_OK,
         )(self.recognize)
 
-        self.router.post("/product")(self.add_product)
-        self.router.get("/product/{product_id}")(self.get_product)
-        self.router.post("/products")(self.list_products)
+        self.router.post("/product", response_model=ProductResponse)(self.add_product)
+        self.router.get(
+            "/product/{product_id}",
+            response_model=ListProductsResponse,
+        )(self.get_product)
+        self.router.post("/products", response_model=ListProductsResponse)(
+            self.list_products
+        )
 
     async def recognize(
         self,
@@ -59,8 +66,8 @@ class ProductRouter:
 
     def list_products(
         self,
+        db: Annotated[Session, Depends(get_db)],
         params: ListProductsRequest | None = None,
-        db: Annotated[Session, Depends(get_db)] = None,
     ):
         if params is None:
             params = ListProductsRequest()

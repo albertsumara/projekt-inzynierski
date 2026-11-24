@@ -1,5 +1,5 @@
-from sqlalchemy import Column, Double, ForeignKey, Integer
-from sqlalchemy.orm import relationship
+from sqlalchemy import Double, ForeignKey, Integer
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base_db import Base
 
@@ -7,13 +7,18 @@ from .base_db import Base
 class IngredientsDb(Base):
     __tablename__ = "ingredients"
 
-    id = Column(Integer, primary_key=True, index=True)
-    product_id = Column(Integer, ForeignKey("products.id"), unique=True, nullable=False)
-    calories = Column(Double, nullable=False)
-    protein = Column(Double, nullable=False)
-    carbs = Column(Double, nullable=False)
-    fat = Column(Double, nullable=False)
-    average_size = Column(Double, nullable=False)
-    shelf_life = Column(Integer, nullable=False)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    product_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("products.id"), unique=True, nullable=False
+    )
+    calories: Mapped[float] = mapped_column(Double, nullable=False)
+    protein: Mapped[float] = mapped_column(Double, nullable=False)
+    carbs: Mapped[float] = mapped_column(Double, nullable=False)
+    fat: Mapped[float] = mapped_column(Double, nullable=False)
+    average_size: Mapped[float] = mapped_column(Double, nullable=False)
+    shelf_life: Mapped[int] = mapped_column(Integer, nullable=False)
 
-    product = relationship("ProductDb", back_populates="ingredients")
+    product: Mapped["ProductDb"] = relationship(back_populates="ingredients")
+
+
+from .product_db import ProductDb
